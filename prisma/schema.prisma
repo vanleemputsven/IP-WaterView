@@ -1,0 +1,111 @@
+// Waterview - Pool Monitoring Platform
+// PostgreSQL via Supabase
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth & Users
+// Supabase Auth manages auth.users; we sync to Profile for app-specific data
+// ---------------------------------------------------------------------------
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  userId    String   @unique // Supabase auth.users.id
+  email     String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  devices Device[]
+
+  @@map("profiles")
+}
+
+// ---------------------------------------------------------------------------
+// IoT Devices
+// ---------------------------------------------------------------------------
+
+model Device {
+  id          String   @id @default(cuid())
+  name        String
+  apiKeyHash  String   // bcrypt or similar; never store plain key
+  profileId   String
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  isActive    Boolean  @default(true)
+  lastSeenAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  measurements Measurement[]
+
+  @@unique([profileId, name])
+  @@map("devices")
+}
+
+// ---------------------------------------------------------------------------
+// Measurements
+// ---------------------------------------------------------------------------
+
+model Measurement {
+  id         String   @id @default(cuid())
+  deviceId  String
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  timestamp  DateTime @default(now())
+
+  // Pool metrics (nullable for future extensibility)
+  temperatureCelsius Decimal? @db.Decimal(4, 2)
+  ph                 Decimal? @db.Decimal(3, 2)
+  chlorinePpm        Decimal? @db.Decimal(4, 2)
+
+  createdAt DateTime @default(now())
+
+  @@index([deviceId, timestamp])
+  @@index([timestamp])
+  @@map("measurements")
+}
+
+// ---------------------------------------------------------------------------
+// System / Audit Logs
+// ---------------------------------------------------------------------------
+
+model SystemLog {
+  id        String   @id @default(cuid())
+  actorType String   // "user" | "device" | "system"
+  actorId   String?  // profileId or deviceId
+  action    String
+  resource  String?  // e.g. "measurement", "device", "settings"
+  metadata  Json?    // flexible payload
+  createdAt DateTime @default(now())
+
+  @@index([actorType, actorId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("system_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Settings / Thresholds
+// ---------------------------------------------------------------------------
+
+model Threshold {
+  id        String   @id @default(cuid())
+  key       String   @unique // e.g. "temperature_min", "ph_max", "chlorine_min"
+  value     Decimal  @db.Decimal(10, 4)
+  unit      String?  // e.g. "celsius", "ppm"
+  updatedAt DateTime @updatedAt
+
+  @@map("thresholds")
+}
