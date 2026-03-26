@@ -1,21 +1,34 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const wvSans = Plus_Jakarta_Sans({
+  variable: "--font-wv-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const wvMono = JetBrains_Mono({
+  variable: "--font-wv-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Waterview — Pool Monitoring",
+  title: "AquaSense — Pool monitoring",
+  applicationName: "AquaSense",
   description: "IoT-based pool water monitoring platform",
+  icons: {
+    // SVG/PNG first for crisp icons; ICO for legacy /favicon.ico clients.
+    icon: [
+      { url: "/AquaSense-logo.svg", type: "image/svg+xml" },
+      { url: "/AquaSense-icon.png", type: "image/png" },
+      { url: "/favicon.ico", type: "image/x-icon" },
+    ],
+    apple: "/AquaSense-icon.png",
+    shortcut: "/AquaSense-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -26,7 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-canvas text-slate-900 antialiased`}
+        className={`${wvSans.variable} ${wvMono.variable} min-h-screen bg-canvas font-sans text-fg antialiased`}
       >
         <Providers>{children}</Providers>
       </body>

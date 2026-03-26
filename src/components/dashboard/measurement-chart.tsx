@@ -37,26 +37,26 @@ export function MeasurementChart({ measurements }: MeasurementChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="rounded-xl border border-border-subtle bg-surface p-12 text-center text-muted">
+      <div className="wv-card p-12 text-center text-muted">
         No measurement data to display.
       </div>
     );
   }
 
   return (
-    <div className="h-80 rounded-xl border border-border-subtle bg-surface p-4">
+    <div className="wv-card h-80 p-4">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-          <XAxis dataKey="time" tick={{ fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+          <XAxis dataKey="time" tick={{ fontSize: 11 }} stroke="rgb(var(--color-muted))" />
+          <YAxis tick={{ fontSize: 11 }} stroke="rgb(var(--color-muted))" />
           <Tooltip />
           <Legend />
           <Line
             type="monotone"
             dataKey="temperature"
             name="Temperature (°C)"
-            stroke="#0ea5e9"
+            stroke="var(--chart-temperature)"
             strokeWidth={2}
             dot={false}
           />
@@ -64,7 +64,7 @@ export function MeasurementChart({ measurements }: MeasurementChartProps) {
             type="monotone"
             dataKey="ph"
             name="pH"
-            stroke="#22c55e"
+            stroke="var(--chart-ph)"
             strokeWidth={2}
             dot={false}
           />
@@ -72,7 +72,7 @@ export function MeasurementChart({ measurements }: MeasurementChartProps) {
             type="monotone"
             dataKey="chlorine"
             name="Chlorine (ppm)"
-            stroke="#f59e0b"
+            stroke="var(--chart-chlorine)"
             strokeWidth={2}
             dot={false}
           />

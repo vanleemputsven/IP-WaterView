@@ -41,7 +41,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Pool status</h1>
+        <h1 className="text-2xl font-bold text-fg">Pool status</h1>
         <p className="mt-1 text-sm text-muted">
           Current measurements from your pool monitor
         </p>
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
       <PoolStatusCards measurements={latestMeasurements} />
 
       <div>
-        <h2 className="text-lg font-semibold text-slate-900">Recent history</h2>
+        <h2 className="text-lg font-semibold text-fg">Recent history</h2>
         <MeasurementChart measurements={recentMeasurements} />
       </div>
     </div>

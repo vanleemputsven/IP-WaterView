@@ -4,6 +4,7 @@ import { ensureProfile } from "@/lib/services/profile-service";
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 import { canAccessAdmin } from "@/lib/auth/rbac";
 import Link from "next/link";
+import { AquaSenseLogo } from "@/components/brand/aqua-sense-logo";
 
 export default async function DashboardLayout({
   children,
@@ -28,10 +29,12 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-canvas">
       <header className="sticky top-0 z-10 border-b border-border-subtle bg-surface/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/dashboard" className="flex items-baseline gap-2">
-            <span className="text-sm font-semibold tracking-wide text-slate-900">
-              Waterview
-            </span>
+          <Link
+            href="/dashboard"
+            className="flex items-center"
+            aria-label="AquaSense — Dashboard"
+          >
+            <AquaSenseLogo decorative className="h-7 w-auto sm:h-8" />
           </Link>
           <DashboardNav isAdmin={isAdmin} />
         </div>

@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Seeding Waterview database...");
+  console.log("Seeding AquaSense database...");
 
   // Create default thresholds
   const thresholdData = [

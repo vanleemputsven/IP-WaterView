@@ -10,7 +10,7 @@ export default async function AdminSettingsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+        <h1 className="text-2xl font-bold text-fg">Settings</h1>
         <p className="mt-1 text-sm text-muted">
           Thresholds and alerts configuration
         </p>
@@ -23,7 +23,7 @@ export default async function AdminSettingsPage() {
             className="rounded-xl border border-border-subtle bg-surface p-6"
           >
             <p className="text-sm font-medium text-muted">{t.key}</p>
-            <p className="mt-1 text-xl font-bold text-slate-900">
+            <p className="mt-1 text-xl font-bold text-fg">
               {t.value.toString()} {t.unit ?? ""}
             </p>
           </div>
