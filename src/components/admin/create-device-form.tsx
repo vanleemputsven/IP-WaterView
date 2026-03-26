@@ -43,7 +43,7 @@ export function CreateDeviceForm() {
       <div className="rounded-xl border border-success/30 bg-success/5 p-6">
         <p className="font-medium text-success">Device created</p>
         <p className="mt-2 text-sm text-muted">
-          Save this API key — it will not be shown again.
+          Save this API key. It will not be shown again.
         </p>
         <pre className="mt-3 overflow-x-auto rounded-lg bg-code-bg px-4 py-3 font-mono text-sm text-inverse-fg">
           {result.apiKey}

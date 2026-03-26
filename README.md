@@ -21,10 +21,10 @@ npm install
 
 Copy `.env.example` to `.env.local` and fill in:
 
-- `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon key
-- `DATABASE_URL` — Prisma connection string (Supabase pooler, port 6543, `?pgbouncer=true`)
-- `DIRECT_URL` — Direct connection for migrations (port 5432)
+- `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anon key
+- `DATABASE_URL`: Prisma connection string (Supabase pooler, port 6543, `?pgbouncer=true`)
+- `DIRECT_URL`: Direct connection for migrations (port 5432)
 
 ### 3. Database
 
@@ -52,7 +52,7 @@ npm run dev
 
 1. Sign up at `/signup`
 2. Go to Admin > Devices (first user is admin)
-3. Create a device — copy the API key
+3. Create a device, then copy the API key
 4. POST measurements:
 
 ```bash

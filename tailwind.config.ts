@@ -36,6 +36,20 @@ const config: Config = {
         sans: ["var(--font-wv-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-wv-mono)", "ui-monospace", "monospace"],
       },
+      keyframes: {
+        "landing-bar-up": {
+          "0%": { transform: "scaleY(0.45)", opacity: "0.65" },
+          "100%": { transform: "scaleY(1)", opacity: "1" },
+        },
+        "landing-marquee": {
+          "0%": { transform: "translate3d(0,0,0)" },
+          "100%": { transform: "translate3d(-50%,0,0)" },
+        },
+      },
+      animation: {
+        "landing-bar-up": "landing-bar-up 0.55s ease-out both",
+        "landing-marquee": "landing-marquee 28s linear infinite",
+      },
     },
   },
   plugins: [],

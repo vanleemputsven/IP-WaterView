@@ -56,7 +56,7 @@ export default async function AdminDevicesPage() {
                   {d.profile.email}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
-                  {d.lastSeenAt?.toISOString() ?? "—"}
+                  {d.lastSeenAt?.toISOString() ?? "-"}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3">
                   <span

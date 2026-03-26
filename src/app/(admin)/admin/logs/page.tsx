@@ -46,7 +46,7 @@ export default async function AdminLogsPage() {
                   {log.actorId ? `:${log.actorId.slice(0, 8)}` : ""}
                 </td>
                 <td className="px-4 py-3 text-sm text-fg-secondary">{log.action}</td>
-                <td className="px-4 py-3 text-sm text-muted">{log.resource ?? "—"}</td>
+                <td className="px-4 py-3 text-sm text-muted">{log.resource ?? "-"}</td>
               </tr>
             ))}
           </tbody>
