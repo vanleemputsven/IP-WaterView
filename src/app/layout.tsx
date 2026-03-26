@@ -16,7 +16,7 @@ const wvMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AquaSense — Pool monitoring",
+  title: "AquaSense: Pool monitoring",
   applicationName: "AquaSense",
   description: "IoT-based pool water monitoring platform",
   icons: {

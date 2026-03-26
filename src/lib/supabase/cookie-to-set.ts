@@ -1,5 +1,5 @@
 /**
- * Payload passed to Supabase SSR `cookies.setAll` — aligned with Next.js cookie `set` options.
+ * Payload passed to Supabase SSR `cookies.setAll`. Aligned with Next.js cookie `set` options.
  */
 export type CookieToSet = {
   name: string;

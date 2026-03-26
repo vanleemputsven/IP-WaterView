@@ -34,7 +34,7 @@ export default async function AdminLayout({
           <Link
             href="/admin"
             className="flex items-center gap-2"
-            aria-label="AquaSense — Admin"
+            aria-label="AquaSense admin"
           >
             <AquaSenseLogo decorative className="h-7 w-auto sm:h-8" />
             <span className="hidden text-sm font-medium text-muted sm:inline">

@@ -22,7 +22,7 @@
   --color-fg-secondary: 51 65 85;
   --color-muted: 100 116 139;
 
-  /* Brand — teal primary for sufficient contrast with white on controls (WCAG AA) */
+  /* Brand: teal primary for sufficient contrast with white on controls (WCAG AA) */
   --color-accent: 15 118 110;
   --color-accent-deep: 17 94 89;
   --color-accent-bright: 13 148 136;
@@ -37,7 +37,7 @@
   --color-code-bg: 30 41 59;
   --color-inverse-fg: 248 250 252;
 
-  /* Charts (hex — consumed directly by SVG / Recharts) */
+  /* Charts (hex, consumed directly by SVG / Recharts) */
   --chart-temperature: #0d9488;
   --chart-ph: #16a34a;
   --chart-chlorine: #ca8a04;
@@ -98,12 +98,12 @@ body {
 }
 
 @layer components {
-  /* Card / panel — architectural flat surface with light depth */
+  /* Card / panel: architectural flat surface with light depth */
   .wv-card {
     @apply rounded-xl border border-border-subtle bg-surface shadow-card;
   }
 
-  /* Auth & settings — frosted panel on atmospheric canvas */
+  /* Auth & settings: frosted panel on atmospheric canvas */
   .wv-panel {
     @apply w-full rounded-2xl border border-border-subtle bg-surface/90 p-8 shadow-card backdrop-blur-md;
   }
@@ -122,5 +122,10 @@ body {
 
   .wv-btn-secondary {
     @apply inline-flex items-center justify-center rounded-lg border border-border-subtle bg-surface px-4 py-2 text-sm font-medium text-fg-secondary transition-colors hover:bg-surface-alt;
+  }
+
+  /* Marketing: cards with token-aligned hover (respects reduced motion via Tailwind motion-safe) */
+  .wv-card-interactive {
+    @apply wv-card transition-all duration-200 ease-out motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-lg motion-safe:hover:border-accent-bright/30;
   }
 }

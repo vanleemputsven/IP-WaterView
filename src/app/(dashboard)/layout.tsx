@@ -32,7 +32,7 @@ export default async function DashboardLayout({
           <Link
             href="/dashboard"
             className="flex items-center"
-            aria-label="AquaSense — Dashboard"
+            aria-label="AquaSense dashboard"
           >
             <AquaSenseLogo decorative className="h-7 w-auto sm:h-8" />
           </Link>

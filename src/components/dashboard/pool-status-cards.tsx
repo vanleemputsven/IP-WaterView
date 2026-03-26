@@ -9,7 +9,7 @@ interface PoolStatusCardsProps {
 }
 
 function formatValue(value: unknown): string {
-  if (value === null || value === undefined) return "—";
+  if (value === null || value === undefined) return "-";
   if (typeof value === "object" && "toString" in value) {
     return (value as { toString: () => string }).toString();
   }
