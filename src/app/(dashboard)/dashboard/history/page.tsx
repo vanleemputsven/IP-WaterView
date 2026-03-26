@@ -27,7 +27,7 @@ export default async function HistoryPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Measurement history</h1>
+        <h1 className="text-2xl font-bold text-fg">Measurement history</h1>
         <p className="mt-1 text-sm text-muted">
           Historical pool measurements over time
         </p>

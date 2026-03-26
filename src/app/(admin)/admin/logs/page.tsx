@@ -11,7 +11,7 @@ export default async function AdminLogsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">System logs</h1>
+        <h1 className="text-2xl font-bold text-fg">System logs</h1>
         <p className="mt-1 text-sm text-muted">
           Audit and system event log
         </p>
@@ -38,14 +38,14 @@ export default async function AdminLogsPage() {
           <tbody className="divide-y divide-border-subtle">
             {logs.map((log) => (
               <tr key={log.id}>
-                <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-700">
+                <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
                   {log.createdAt.toISOString()}
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-700">
+                <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
                   {log.actorType}
                   {log.actorId ? `:${log.actorId.slice(0, 8)}` : ""}
                 </td>
-                <td className="px-4 py-3 text-sm text-slate-700">{log.action}</td>
+                <td className="px-4 py-3 text-sm text-fg-secondary">{log.action}</td>
                 <td className="px-4 py-3 text-sm text-muted">{log.resource ?? "—"}</td>
               </tr>
             ))}

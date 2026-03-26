@@ -1,6 +1,6 @@
-# Waterview
+# AquaSense
 
-IoT-based pool monitoring platform. Monitors water temperature, pH, and (future) chlorine levels via ESP32 devices.
+IoT pool monitoring: temperature, pH, and chlorine via connected devices (e.g. ESP32).
 
 ## Stack
 

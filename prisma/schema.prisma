@@ -1,4 +1,4 @@
-// Waterview - Pool Monitoring Platform
+// AquaSense - Pool monitoring platform
 // PostgreSQL via Supabase
 
 generator client {

@@ -45,7 +45,7 @@ export function CreateDeviceForm() {
         <p className="mt-2 text-sm text-muted">
           Save this API key — it will not be shown again.
         </p>
-        <pre className="mt-3 overflow-x-auto rounded-lg bg-slate-900 px-4 py-3 text-sm text-slate-100">
+        <pre className="mt-3 overflow-x-auto rounded-lg bg-code-bg px-4 py-3 font-mono text-sm text-inverse-fg">
           {result.apiKey}
         </pre>
         <p className="mt-2 text-xs text-muted">
@@ -63,7 +63,7 @@ export function CreateDeviceForm() {
         </div>
       )}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="name" className="block text-sm font-medium text-fg-secondary">
           Device name
         </label>
         <input
@@ -71,14 +71,10 @@ export function CreateDeviceForm() {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="mt-1 block w-full max-w-xs rounded-lg border border-border-subtle px-3 py-2 text-slate-900"
+          className="wv-input max-w-xs"
         />
       </div>
-      <button
-        type="submit"
-        disabled={loading}
-        className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-deep disabled:opacity-50"
-      >
+      <button type="submit" disabled={loading} className="wv-btn-primary">
         {loading ? "Creating…" : "Create device (with demo data)"}
       </button>
     </form>

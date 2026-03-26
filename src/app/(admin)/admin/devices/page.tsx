@@ -12,14 +12,14 @@ export default async function AdminDevicesPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Devices</h1>
+        <h1 className="text-2xl font-bold text-fg">Devices</h1>
         <p className="mt-1 text-sm text-muted">
           Registered IoT devices and API keys
         </p>
       </div>
 
       <div className="rounded-xl border border-border-subtle bg-surface p-6">
-        <h2 className="text-sm font-medium text-slate-900">Create device</h2>
+        <h2 className="text-sm font-medium text-fg">Create device</h2>
         <p className="mt-1 text-sm text-muted">
           Create a new device and get an API key. Optionally seed with demo measurements.
         </p>
@@ -49,13 +49,13 @@ export default async function AdminDevicesPage() {
           <tbody className="divide-y divide-border-subtle">
             {devices.map((d) => (
               <tr key={d.id}>
-                <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">
+                <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-fg">
                   {d.name}
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-700">
+                <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
                   {d.profile.email}
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-700">
+                <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
                   {d.lastSeenAt?.toISOString() ?? "—"}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3">

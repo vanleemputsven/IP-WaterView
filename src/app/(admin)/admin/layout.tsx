@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getProfileByUserId } from "@/lib/services/profile-service";
 import { canAccessAdmin } from "@/lib/auth/rbac";
 import Link from "next/link";
+import { AquaSenseLogo } from "@/components/brand/aqua-sense-logo";
 import { Droplets, FileText, Settings, Cpu } from "lucide-react";
 
 export default async function AdminLayout({
@@ -23,16 +24,21 @@ export default async function AdminLayout({
   }
 
   const navClass = (path: string) => {
-    return `flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-alt hover:text-slate-900`;
+    return `flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-alt hover:text-fg`;
   };
 
   return (
     <div className="min-h-screen bg-canvas">
       <header className="sticky top-0 z-10 border-b border-border-subtle bg-surface/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/admin" className="flex items-baseline gap-2">
-            <span className="text-sm font-semibold tracking-wide text-slate-900">
-              Waterview Admin
+          <Link
+            href="/admin"
+            className="flex items-center gap-2"
+            aria-label="AquaSense — Admin"
+          >
+            <AquaSenseLogo decorative className="h-7 w-auto sm:h-8" />
+            <span className="hidden text-sm font-medium text-muted sm:inline">
+              Admin
             </span>
           </Link>
           <nav className="flex items-center gap-2">

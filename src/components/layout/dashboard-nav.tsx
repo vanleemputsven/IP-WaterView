@@ -25,8 +25,8 @@ export function DashboardNav({ isAdmin }: DashboardNavProps) {
     const base =
       "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors";
     const active = pathname.startsWith(path)
-      ? "bg-surface-alt text-slate-900 font-medium"
-      : "text-muted hover:bg-surface-alt hover:text-slate-900";
+      ? "bg-surface-alt text-fg font-medium"
+      : "text-muted hover:bg-surface-alt hover:text-fg";
     return `${base} ${active}`;
   };
 
@@ -49,7 +49,7 @@ export function DashboardNav({ isAdmin }: DashboardNavProps) {
       <button
         type="button"
         onClick={handleSignOut}
-        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-alt hover:text-slate-900"
+        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-alt hover:text-fg"
       >
         <LogOut className="h-4 w-4" />
         Sign out

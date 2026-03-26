@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" width="120" height="32">
-  <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#0ea5e9"/>
-      <stop offset="100%" style="stop-color:#0284c7"/>
-    </linearGradient>
-  </defs>
-  <text x="0" y="24" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="700" fill="url(#grad)">Waterview</text>
-</svg>
