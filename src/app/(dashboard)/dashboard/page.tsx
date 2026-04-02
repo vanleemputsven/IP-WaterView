@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getProfileByUserId } from "@/lib/services/profile-service";
 import { prisma } from "@/lib/db/prisma";
+import { mapMeasurementToClient } from "@/lib/mappers/measurement-client";
 import { PoolStatusCards } from "@/components/dashboard/pool-status-cards";
 import { MeasurementChart } from "@/components/dashboard/measurement-chart";
 
@@ -25,18 +26,18 @@ export default async function DashboardPage() {
   });
 
   const latestMeasurements = devices.flatMap((d) =>
-    d.measurements.map((m) => ({
-      ...m,
-      deviceName: d.name,
-    }))
+    d.measurements.map((m) =>
+      mapMeasurementToClient({ ...m, deviceName: d.name })
+    )
   );
 
-  const recentMeasurements = await prisma.measurement.findMany({
+  const recentMeasurementsRaw = await prisma.measurement.findMany({
     where: { deviceId: { in: devices.map((d) => d.id) } },
     orderBy: { timestamp: "desc" },
     take: 100,
     include: { device: true },
   });
+  const recentMeasurements = recentMeasurementsRaw.map(mapMeasurementToClient);
 
   return (
     <div className="space-y-8">

@@ -1,18 +1,13 @@
 "use client";
 
-import type { Measurement } from "@prisma/client";
+import type { ClientMeasurement } from "@/lib/mappers/measurement-client";
 
 interface PoolStatusCardsProps {
-  measurements: Array<
-    Measurement & { deviceName?: string }
-  >;
+  measurements: Array<ClientMeasurement>;
 }
 
-function formatValue(value: unknown): string {
-  if (value === null || value === undefined) return "-";
-  if (typeof value === "object" && "toString" in value) {
-    return (value as { toString: () => string }).toString();
-  }
+function formatValue(value: number | null): string {
+  if (value === null) return "-";
   return String(value);
 }
 

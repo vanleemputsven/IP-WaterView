@@ -3,6 +3,11 @@
 import { useCallback, useState } from "react";
 import { LineChart } from "lucide-react";
 
+/** Demo values for the hero trend strip — matches the original marketing preview. */
+const TREND_BAR_HEIGHTS = [
+  40, 55, 48, 62, 58, 70, 66, 74, 68, 80, 76, 88,
+] as const;
+
 const METRICS = [
   {
     label: "Temperature",
@@ -18,8 +23,6 @@ const METRICS = [
     tone: "text-warning",
   },
 ] as const;
-
-const BAR_HEIGHTS = [40, 55, 48, 62, 58, 70, 66, 74, 68, 80, 76, 88];
 
 /** Panel + status transitions: calm ease-out, aligned with AquaSense motion defaults. */
 const transitionPanel =
@@ -103,7 +106,7 @@ export function LandingHeroPreview() {
               }`}
               aria-hidden={tab !== "trend"}
             >
-              <span className="text-xs font-medium text-muted">Demo · last 24h</span>
+              <span className="text-xs font-medium text-muted">Demo (last 24h)</span>
             </div>
           </div>
         </div>
@@ -123,8 +126,8 @@ export function LandingHeroPreview() {
               </p>
               <p className="mt-1 text-sm font-medium text-fg">Main pool</p>
               <p className="mt-2 text-xs text-muted">
-                Tap a metric to highlight it. Same idea as focusing a reading in the
-                real app.
+                Tap a metric to highlight it. It is the same idea as focusing a
+                measurement in the real app.
               </p>
             </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -168,14 +171,17 @@ export function LandingHeroPreview() {
             <div className="flex w-full min-h-0 flex-1 flex-col justify-center">
               <div className="rounded-xl border border-dashed border-border-subtle bg-canvas/50 px-4 py-4">
                 <div className="flex items-center gap-2 text-xs font-medium text-fg-secondary">
-                  <LineChart className="h-4 w-4 shrink-0 text-accent-bright" aria-hidden />
-                  Trend preview, last 24h
+                  <LineChart
+                    className="h-4 w-4 shrink-0 text-accent-bright"
+                    aria-hidden
+                  />
+                  Trend preview (last 24h)
                 </div>
                 <div
                   key={trendAnimKey}
                   className="mt-4 flex h-28 items-end gap-1.5 sm:h-32"
                 >
-                  {BAR_HEIGHTS.map((h, i) => (
+                  {TREND_BAR_HEIGHTS.map((h, i) => (
                     <div
                       key={i}
                       className="flex h-full min-h-0 flex-1 flex-col justify-end"

@@ -10,18 +10,40 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AquaSenseLogo } from "@/components/brand/aqua-sense-logo";
+import {
+  FitCheckLink,
+  FitCheckTeaser,
+  LandingFitQuiz,
+} from "@/components/marketing/landing-fit-quiz";
 import { LandingHeroPreview } from "@/components/marketing/landing-hero-preview";
 
-/** Ambient strip — abstract motifs, not a feature list */
-const LANDING_STRIP_PHRASES = [
-  "ripple",
-  "signal",
-  "clarity",
-  "cadence",
-  "threshold",
-  "horizon",
-  "baseline",
-  "continuum",
+/** Quick-scan highlights — each item links somewhere useful */
+const LANDING_STRIP_ITEMS = [
+  {
+    text: "Live dashboard: temperature, pH, and chlorine",
+    href: "#features",
+  },
+  {
+    text: "History and trends to catch drift early",
+    href: "#features",
+  },
+  {
+    text: "Sensor to dashboard in three steps",
+    href: "#how-it-works",
+  },
+  {
+    text: "Admin tools for devices, logs, and settings",
+    href: "#features",
+  },
+  {
+    text: "Calm UI for operators who check every day",
+    href: "#why-aquasense",
+  },
+  {
+    text: "2‑minute fit check: is monitoring a match for you?",
+    href: "#fit-check",
+  },
+  { text: "Create an account and explore", href: "/signup" },
 ] as const;
 
 function SectionHeading({
@@ -88,6 +110,9 @@ export function LandingPage() {
             >
               Why AquaSense
             </a>
+            <FitCheckLink className="rounded-lg px-3 py-2 text-sm font-medium text-fg-secondary transition-colors hover:bg-surface-alt hover:text-fg">
+              Fit check
+            </FitCheckLink>
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -116,6 +141,9 @@ export function LandingPage() {
                   >
                     Why AquaSense
                   </a>
+                  <FitCheckLink className="rounded-lg px-3 py-2.5 text-sm font-medium text-fg-secondary transition-colors hover:bg-surface-alt hover:text-fg">
+                    Fit check
+                  </FitCheckLink>
                   <hr className="my-1 border-border-subtle" />
                   <Link
                     href="/login"
@@ -150,6 +178,7 @@ export function LandingPage() {
       </header>
 
       <main id="main" className="flex-1">
+        <LandingFitQuiz />
         <section className="relative overflow-hidden px-4 pb-16 pt-12 sm:px-6 sm:pb-24 sm:pt-16 lg:px-8">
           <div
             className="pointer-events-none absolute inset-x-0 -top-24 h-64 bg-gradient-to-b from-accent-bright/15 to-transparent blur-3xl"
@@ -162,8 +191,8 @@ export function LandingPage() {
               </h1>
               <p className="mt-5 max-w-xl text-lg text-muted">
                 AquaSense connects your sensors to a modern monitoring experience:
-                live chemistry at a glance, history you can trust, and admin tools
-                that stay out of your way.
+                live chemistry at a glance, trusted history, and admin tools that
+                get out of your way.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link
@@ -199,7 +228,7 @@ export function LandingPage() {
                   <dt className="text-xs font-medium uppercase tracking-wide text-muted">
                     Built for
                   </dt>
-                  <dd className="mt-1 text-lg font-semibold text-fg">Pools & pros</dd>
+                  <dd className="mt-1 text-lg font-semibold text-fg">Pools and pros</dd>
                 </div>
                 <div>
                   <dt className="text-xs font-medium uppercase tracking-wide text-muted">
@@ -218,7 +247,7 @@ export function LandingPage() {
 
         <section
           className="border-y border-border-subtle/60 bg-gradient-to-b from-surface-alt/25 via-transparent to-surface-alt/25 backdrop-blur-sm"
-          aria-label="Ambient motifs"
+          aria-label="Product highlights"
         >
           <div className="group relative mx-auto max-w-6xl px-4 py-2.5 sm:px-6 sm:py-3 lg:px-8">
             <div
@@ -230,13 +259,8 @@ export function LandingPage() {
               aria-hidden
             />
             <div className="overflow-hidden">
-              <p className="sr-only">
-                Decorative scrolling phrases (not product claims):{" "}
-                {LANDING_STRIP_PHRASES.join(", ")}.
-              </p>
               <div
                 className="pointer-events-none select-none [-webkit-mask-image:linear-gradient(90deg,transparent,black_6%,black_94%,transparent)] [mask-image:linear-gradient(90deg,transparent,black_6%,black_94%,transparent)]"
-                aria-hidden
               >
                 <div
                   className="flex w-max pointer-events-auto motion-safe:animate-landing-marquee motion-safe:will-change-transform motion-reduce:animate-none motion-reduce:will-change-auto motion-safe:backface-hidden group-hover:[animation-play-state:paused]"
@@ -247,24 +271,50 @@ export function LandingPage() {
                       className="flex shrink-0 items-center gap-1 px-4 sm:gap-1.5 sm:px-8"
                       aria-hidden={copy !== 0}
                     >
-                      {LANDING_STRIP_PHRASES.map((phrase, index) => (
-                        <li
-                          key={`${copy}-${phrase}`}
-                          className="flex items-center gap-4 sm:gap-5"
-                        >
-                          {index > 0 && (
-                            <span
-                              className="font-light text-accent-bright/35"
-                              aria-hidden
+                      {LANDING_STRIP_ITEMS.map((item, index) => {
+                        const labelClasses =
+                          "whitespace-nowrap font-medium text-muted/90 transition-colors duration-300 ease-out tracking-[0.02em] motion-reduce:transition-none sm:text-sm outline-none focus-visible:rounded focus-visible:text-accent-bright focus-visible:ring-2 focus-visible:ring-accent-bright/40 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas group-hover:text-fg-secondary";
+
+                        const inner =
+                          item.href === "#fit-check" ? (
+                            <FitCheckLink
+                              className={`${labelClasses} hover:text-accent-bright`}
                             >
-                              ·
-                            </span>
-                          )}
-                          <span className="cursor-default whitespace-nowrap font-medium lowercase text-muted/90 transition-colors duration-300 ease-out tracking-[0.04em] motion-reduce:transition-none hover:text-accent-bright/80 sm:text-sm">
-                            {phrase}
-                          </span>
-                        </li>
-                      ))}
+                              {item.text}
+                            </FitCheckLink>
+                          ) : item.href.startsWith("#") ? (
+                            <a
+                              href={item.href}
+                              className={`${labelClasses} hover:text-accent-bright`}
+                            >
+                              {item.text}
+                            </a>
+                          ) : (
+                            <Link
+                              href={item.href}
+                              className={`${labelClasses} hover:text-accent-bright`}
+                            >
+                              {item.text}
+                            </Link>
+                          );
+
+                        return (
+                          <li
+                            key={`${copy}-${item.text}`}
+                            className="flex items-center gap-4 sm:gap-5"
+                          >
+                            {index > 0 && (
+                              <span
+                                className="font-light text-accent-bright/35"
+                                aria-hidden
+                              >
+                                ·
+                              </span>
+                            )}
+                            {inner}
+                          </li>
+                        );
+                      })}
                     </ul>
                   ))}
                 </div>
@@ -280,7 +330,7 @@ export function LandingPage() {
           <SectionHeading
             eyebrow="Features"
             title="Everything you need to stay on top of water health"
-            description="From the first sensor ping to the latest reading in history, AquaSense keeps the experience consistent, fast, and easy to scan."
+            description="From the first sensor ping to your latest reading, AquaSense keeps the experience consistent, fast, and easy to scan."
           />
           <div className="mx-auto mt-12 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[
@@ -291,18 +341,18 @@ export function LandingPage() {
               },
               {
                 icon: LineChart,
-                title: "History & trends",
-                text: "See how chemistry evolves over time so you can spot drift before it becomes a maintenance issue.",
+                title: "History and trends",
+                text: "See how your chemistry changes over time, so you can spot drift before it becomes a maintenance issue.",
               },
               {
                 icon: ShieldCheck,
-                title: "Admin & audit-minded",
+                title: "Admin and audit-minded",
                 text: "Separate admin flows for devices, logs, and settings, built for teams that need accountability.",
               },
               {
                 icon: Cpu,
                 title: "Built for connected hardware",
-                text: "Structured around devices and secure ingest patterns so your fleet can grow without rework.",
+                text: "Structured around devices and secure ingest patterns, so your fleet can grow without rework.",
               },
               {
                 icon: Droplets,
@@ -333,24 +383,24 @@ export function LandingPage() {
           <SectionHeading
             eyebrow="How it works"
             title="From sensor to signal in three steps"
-            description="A straightforward flow your team can explain to anyone, without a whiteboard full of jargon."
+            description="A simple flow your team can explain to anyone, without jargon overload."
           />
           <ol className="mx-auto mt-12 grid max-w-6xl gap-8 md:grid-cols-3">
             {[
               {
                 step: "01",
                 title: "Connect your device",
-                body: "Register hardware and obtain credentials through the admin tools. Seed demo data when you want to explore the UI first.",
+                body: "Register hardware and obtain credentials through the admin tools. Seed demo data if you want to explore the UI first.",
               },
               {
                 step: "02",
                 title: "Ingest measurements",
-                body: "Send structured readings to the API. Validate inputs server-side so your dashboard always reflects trusted data.",
+                body: "Send structured measurements to the API. Validate inputs server-side so your dashboard always reflects trusted data.",
               },
               {
                 step: "03",
-                title: "Monitor & decide",
-                body: "Use the dashboard for at-a-glance health and history for deeper context, then act with confidence.",
+                title: "Monitor and decide",
+                body: "Use the dashboard for at-a-glance health, history for deeper context, then act with confidence.",
               },
             ].map((item) => (
               <li key={item.step} className="relative">
@@ -365,6 +415,12 @@ export function LandingPage() {
             ))}
           </ol>
         </section>
+
+        <div className="px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <FitCheckTeaser />
+          </div>
+        </div>
 
         <section
           id="why-aquasense"
@@ -382,7 +438,7 @@ export function LandingPage() {
                 <p className="mt-4 text-muted">
                   Too many dashboards compete for attention with noise and neon overload.
                   AquaSense is intentionally calm: typography you can read quickly, semantic
-                  color for status, and a layout that mirrors how operators actually scan
+                  color for status, and a layout built around how operators review water
                   chemistry.
                 </p>
                 <ul className="mt-8 space-y-4">
@@ -439,6 +495,9 @@ export function LandingPage() {
             >
               How it works
             </a>
+            <FitCheckLink className="transition-colors hover:text-fg">
+              Fit check
+            </FitCheckLink>
             <Link href="/login" className="transition-colors hover:text-fg">
               Sign in
             </Link>

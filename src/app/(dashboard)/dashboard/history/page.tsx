@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getProfileByUserId } from "@/lib/services/profile-service";
 import { prisma } from "@/lib/db/prisma";
+import { mapMeasurementToClient } from "@/lib/mappers/measurement-client";
 import { MeasurementChart } from "@/components/dashboard/measurement-chart";
 
 export const dynamic = "force-dynamic";
@@ -17,12 +18,13 @@ export default async function HistoryPage() {
     where: { profileId: profile.id, isActive: true },
   });
 
-  const measurements = await prisma.measurement.findMany({
+  const measurementsRaw = await prisma.measurement.findMany({
     where: { deviceId: { in: devices.map((d) => d.id) } },
     orderBy: { timestamp: "desc" },
     take: 500,
     include: { device: true },
   });
+  const measurements = measurementsRaw.map(mapMeasurementToClient);
 
   return (
     <div className="space-y-8">

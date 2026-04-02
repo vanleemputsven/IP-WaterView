@@ -45,10 +45,15 @@ const config: Config = {
           "0%": { transform: "translate3d(0,0,0)" },
           "100%": { transform: "translate3d(-50%,0,0)" },
         },
+        "landing-quiz-step": {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "landing-bar-up": "landing-bar-up 0.55s ease-out both",
-        "landing-marquee": "landing-marquee 28s linear infinite",
+        "landing-marquee": "landing-marquee 40s linear infinite",
+        "landing-quiz-step": "landing-quiz-step 0.35s ease-out both",
       },
     },
   },
