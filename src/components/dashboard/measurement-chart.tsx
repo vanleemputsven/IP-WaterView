@@ -10,19 +10,14 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import type { Measurement } from "@prisma/client";
+import type { ClientMeasurement } from "@/lib/mappers/measurement-client";
 
 interface MeasurementChartProps {
-  measurements: Array<Measurement & { device?: { name: string } }>;
+  measurements: ClientMeasurement[];
 }
 
-function formatDecimal(d: unknown): number {
-  if (d === null || d === undefined) return 0;
-  if (typeof d === "number") return d;
-  if (typeof d === "object" && "toString" in d) {
-    return parseFloat((d as { toString: () => string }).toString()) || 0;
-  }
-  return 0;
+function formatMetric(value: number | null): number {
+  return value === null ? 0 : value;
 }
 
 export function MeasurementChart({ measurements }: MeasurementChartProps) {
@@ -30,9 +25,9 @@ export function MeasurementChart({ measurements }: MeasurementChartProps) {
     .reverse()
     .map((m) => ({
       time: new Date(m.timestamp).toLocaleString(),
-      temperature: formatDecimal(m.temperatureCelsius),
-      ph: formatDecimal(m.ph),
-      chlorine: formatDecimal(m.chlorinePpm),
+      temperature: formatMetric(m.temperatureCelsius),
+      ph: formatMetric(m.ph),
+      chlorine: formatMetric(m.chlorinePpm),
     }));
 
   if (data.length === 0) {

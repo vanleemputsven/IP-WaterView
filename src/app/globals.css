@@ -65,6 +65,14 @@ body {
 }
 
 @layer base {
+  /*
+   * Closed <dialog> must stay hidden. Tailwind display utilities (e.g. flex) on <dialog>
+   * otherwise override the user-agent rule and the modal content appears on every page load.
+   */
+  dialog:not([open]) {
+    display: none !important;
+  }
+
   html {
     scroll-behavior: smooth;
   }
