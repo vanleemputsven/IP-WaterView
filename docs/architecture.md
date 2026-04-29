@@ -126,6 +126,8 @@ AquaSense/
 | `/auth/callback` | Public | Supabase OAuth callback |
 | `/(dashboard)/*` | User+ | Pool status, history, charts |
 | `/(admin)/admin/*` | Admin | Logs, settings, devices |
+| `/api/admin/devices` | Admin | Register device (API key issued once) |
+| `/api/admin/devices/[id]` | Admin | Delete device and cascade measurements |
 | `/api/measurements` | Device (API key) | IoT ingestion |
 | `/api/health` | Public | Health check |
 

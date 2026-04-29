@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { formatDateTimeForDisplay } from "@/lib/format/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +40,7 @@ export default async function AdminLogsPage() {
             {logs.map((log) => (
               <tr key={log.id}>
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
-                  {log.createdAt.toISOString()}
+                  {formatDateTimeForDisplay(log.createdAt)}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
                   {log.actorType}

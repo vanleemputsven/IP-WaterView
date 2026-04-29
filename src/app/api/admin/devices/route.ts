@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { createClient } from "@/lib/supabase/server";
 import { getProfileByUserId } from "@/lib/services/profile-service";
 import { canAccessAdmin } from "@/lib/auth/rbac";
 import { prisma } from "@/lib/db/prisma";
 import { hashApiKeyForStorage } from "@/lib/auth/device-auth";
-import { randomBytes } from "crypto";
+import { generateDeviceApiKey } from "@/lib/devices/generate-device-api-key";
 import { createLog } from "@/lib/services/log-service";
 
-function generateApiKey(): string {
-  return `wv_${randomBytes(24).toString("hex")}`;
-}
+const postDeviceBodySchema = z
+  .object({
+    name: z.string().max(120).optional(),
+    seedMeasurements: z.boolean().optional(),
+  })
+  .strict();
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -24,21 +29,54 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const name = typeof body.name === "string" ? body.name.trim() : "Pool Monitor";
-  const seedMeasurements = body.seedMeasurements !== false;
+  const raw = await request.json().catch(() => ({}));
+  const parsed = postDeviceBodySchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message ?? "Invalid body" },
+      { status: 400 }
+    );
+  }
 
-  const apiKey = generateApiKey();
+  const trimmedName =
+    typeof parsed.data.name === "string" ? parsed.data.name.trim() : "";
+  const name = trimmedName.length > 0 ? trimmedName : "Pool Monitor";
+  /** Demo measurements are opt-in only (`seedMeasurements: true`). */
+  const seedMeasurements = parsed.data.seedMeasurements === true;
+
+  const apiKey = generateDeviceApiKey();
   const apiKeyHash = hashApiKeyForStorage(apiKey);
 
-  const device = await prisma.device.create({
-    data: {
-      name: name || "Pool Monitor",
-      apiKeyHash,
-      profileId: profile.id,
-      isActive: true,
-    },
-  });
+  let device: { id: string; name: string };
+
+  try {
+    device = await prisma.device.create({
+      data: {
+        name,
+        apiKeyHash,
+        profileId: profile.id,
+        isActive: true,
+      },
+      select: { id: true, name: true },
+    });
+  } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2002"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "You already have a device with this name. Each device needs a unique name on your account.",
+        },
+        { status: 409 }
+      );
+    }
+    return NextResponse.json(
+      { error: "Failed to create device" },
+      { status: 500 }
+    );
+  }
 
   if (seedMeasurements) {
     const now = new Date();
@@ -62,7 +100,11 @@ export async function POST(request: Request) {
     actorId: profile.id,
     action: "device.created",
     resource: "device",
-    metadata: { deviceId: device.id, name: device.name },
+    metadata: {
+      deviceId: device.id,
+      name: device.name,
+      seedDemoMeasurements: seedMeasurements,
+    },
   });
 
   return NextResponse.json(

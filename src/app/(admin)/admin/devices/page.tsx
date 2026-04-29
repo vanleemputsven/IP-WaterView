@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/db/prisma";
+import { formatDateTimeForDisplay } from "@/lib/format/datetime";
 import { CreateDeviceForm } from "@/components/admin/create-device-form";
+import { DeleteDeviceButton } from "@/components/admin/delete-device-button";
+import { DeviceActiveToggle } from "@/components/admin/device-active-toggle";
+import { DeviceApiKeyButton } from "@/components/admin/device-api-key-button";
+import { RenameDeviceButton } from "@/components/admin/rename-device-button";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +26,8 @@ export default async function AdminDevicesPage() {
       <div className="rounded-xl border border-border-subtle bg-surface p-6">
         <h2 className="text-sm font-medium text-fg">Create device</h2>
         <p className="mt-1 text-sm text-muted">
-          Create a new device and get an API key. Optionally seed with demo measurements.
+          Register a device and receive an API key. Demo chart data is optional — use it only to try
+          the dashboard without real hardware.
         </p>
         <div className="mt-4">
           <CreateDeviceForm />
@@ -39,10 +45,16 @@ export default async function AdminDevicesPage() {
                 Owner
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted">
+                Created
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted">
                 Last seen
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted">
-                Status
+                Enabled
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted">
+                Actions
               </th>
             </tr>
           </thead>
@@ -56,16 +68,20 @@ export default async function AdminDevicesPage() {
                   {d.profile.email}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
-                  {d.lastSeenAt?.toISOString() ?? "-"}
+                  {formatDateTimeForDisplay(d.createdAt)}
                 </td>
-                <td className="whitespace-nowrap px-4 py-3">
-                  <span
-                    className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                      d.isActive ? "bg-success/20 text-success" : "bg-muted/20 text-muted"
-                    }`}
-                  >
-                    {d.isActive ? "Active" : "Inactive"}
-                  </span>
+                <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
+                  {formatDateTimeForDisplay(d.lastSeenAt)}
+                </td>
+                <td className="px-4 py-3 align-middle">
+                  <DeviceActiveToggle deviceId={d.id} isActive={d.isActive} />
+                </td>
+                <td className="px-4 py-3 text-right align-middle">
+                  <div className="inline-flex flex-wrap items-center justify-end gap-2 whitespace-normal">
+                    <RenameDeviceButton deviceId={d.id} deviceName={d.name} />
+                    <DeviceApiKeyButton deviceId={d.id} deviceName={d.name} />
+                    <DeleteDeviceButton deviceId={d.id} deviceName={d.name} />
+                  </div>
                 </td>
               </tr>
             ))}
