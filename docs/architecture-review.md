@@ -1,4 +1,4 @@
-# Waterview Architecture Review
+# AquaSense Architecture Review
 
 ## Alignment with Best Practices
 
@@ -28,7 +28,7 @@
 | @supabase/ssr | ✓ | Using current package (not deprecated auth-helpers) |
 | Server + browser clients | ✓ | `lib/supabase/server.ts` and `client.ts` |
 | Middleware session refresh | ✓ | `updateSession` refreshes tokens; cookies set on response |
-| getClaims vs getSession | ⚠ | Using `getUser()`; Supabase docs recommend `getClaims()` for protection—consider upgrading when available |
+| getClaims vs getSession | ⚠ | Using `getUser()`; Supabase docs recommend `getClaims()` for protection; consider upgrading when available |
 
 ### Security
 

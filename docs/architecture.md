@@ -1,10 +1,10 @@
-# Waterview Architecture
+# AquaSense Architecture
 
 ## 1. ArchForm Reference Analysis
 
 ### What to Reuse (Conceptually)
 
-| Pattern | ArchForm | Waterview Adaptation |
+| Pattern | ArchForm | AquaSense adaptation |
 |---------|----------|----------------------|
 | **Folder structure** | `app/`, `components/`, `lib/` | Use `src/` prefix for cleaner separation; keep feature-based component folders |
 | **Naming** | kebab-case files, PascalCase components | Same |
@@ -17,16 +17,16 @@
 
 | ArchForm Pattern | Reason |
 |------------------|--------|
-| MongoDB + native driver | Waterview uses PostgreSQL + Prisma for relational data, migrations, type safety |
-| NextAuth Credentials | Waterview uses Supabase Auth (required stack) |
+| MongoDB + native driver | AquaSense uses PostgreSQL + Prisma for relational data, migrations, type safety |
+| NextAuth Credentials | AquaSense uses Supabase Auth (required stack) |
 | Manual validation | User rules require Zod; all inputs must be validated |
-| Single admin (email + hash) | Waterview needs roles (user, admin) and multi-user support |
-| Inline API logic | Waterview separates routes → services → repositories |
+| Single admin (email + hash) | AquaSense needs roles (user, admin) and multi-user support |
+| Inline API logic | AquaSense separates routes → services → repositories |
 | Dutch/mixed language | English only |
 
 ### What to Improve
 
-| Area | ArchForm Issue | Waterview Approach |
+| Area | ArchForm Issue | AquaSense approach |
 |------|----------------|-------------------|
 | **Validation** | Manual `typeof`, no schema | Zod schemas for all API inputs and form data |
 | **Auth logging** | Logs credentials in dev | No credential logging; structured audit logs only |
@@ -40,7 +40,7 @@
 ## 2. Proposed Project Structure
 
 ```
-IP-Waterview/
+AquaSense/
 ├── src/
 │   ├── app/                          # Next.js App Router
 │   │   ├── (auth)/                   # Route group: login, signup, callback

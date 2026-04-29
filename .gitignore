@@ -29,3 +29,10 @@ yarn-error.log*
 
 # Prisma
 prisma/migrations/*_migration_lock.toml
+
+docs/*
+docs/architecture.md
+docs/design-tokens.md
+docs/email-templates.md
+docs/supabase-setup.md
+

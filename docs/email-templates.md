@@ -1,6 +1,6 @@
-# Waterview Email Templates
+# AquaSense Email Templates
 
-Modern, consistent email templates for Supabase Auth, aligned with the Waterview design system and app UI.
+Modern, consistent email templates for Supabase Auth, aligned with the AquaSense design system and app UI.
 
 ## Overview
 
@@ -27,7 +27,7 @@ Templates use `{{ .SiteURL }}/logo.png` for the logo. You must serve a logo at t
 
 ### Option 2: SVG fallback
 
-Some email clients block external images. Each template includes a text fallback: if the image fails to load, "Waterview" is shown as styled text.
+Some email clients block external images. Each template includes a text fallback: if the image fails to load, "AquaSense" is shown as styled text.
 
 ### Option 3: Local development
 
@@ -51,7 +51,7 @@ For **hosted** Supabase projects, templates are configured in the Dashboard:
 | Template | Suggested subject |
 |----------|-------------------|
 | Confirm signup | `Confirm your signup` |
-| Invite user | `You're invited to Waterview` |
+| Invite user | `You're invited to AquaSense` |
 | Magic link | `Your sign-in link` |
 | Reset password | `Reset your password` |
 | Change email address | `Confirm email change` |
@@ -67,7 +67,7 @@ subject = "Confirm your signup"
 content_path = "./supabase/email-templates/confirm-signup.html"
 
 [auth.email.template.invite]
-subject = "You're invited to Waterview"
+subject = "You're invited to AquaSense"
 content_path = "./supabase/email-templates/invite-user.html"
 
 [auth.email.template.magic_link]
@@ -103,7 +103,7 @@ Supabase provides these [template variables](https://supabase.com/docs/guides/au
 | `{{ .Email }}` | User email |
 | `{{ .NewEmail }}` | New email (change email template only) |
 
-## Design Consistency with Waterview App
+## Design Consistency with AquaSense app
 
 Templates match the app's visual language:
 
@@ -129,10 +129,10 @@ Templates match the app's visual language:
 
 ## Best Practices Applied
 
-- **Table-based layout** — Reliable across Gmail, Outlook, Apple Mail
-- **Inline CSS** — No external stylesheets (blocked by many clients)
-- **System fonts** — -apple-system, Segoe UI, Roboto
-- **PNG logo** — SVG often blocked; use `logo.png` in `public/`
-- **Fallback** — `onerror` shows "Waterview" text if image fails; `alt` as backup
-- **MSO conditionals** — Outlook-specific fixes where needed
-- **Mobile-first** — max-width 480px, responsive padding
+- **Table-based layout**: Reliable across Gmail, Outlook, Apple Mail
+- **Inline CSS**: No external stylesheets (blocked by many clients)
+- **System fonts**: -apple-system, Segoe UI, Roboto
+- **PNG logo**: SVG often blocked; use `logo.png` in `public/`
+- **Fallback**: `onerror` shows "AquaSense" text if image fails; `alt` as backup
+- **MSO conditionals**: Outlook-specific fixes where needed
+- **Mobile-first**: max-width 480px, responsive padding
