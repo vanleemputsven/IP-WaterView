@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getProfileByUserId } from "@/lib/services/profile-service";
 import { canAccessAdmin } from "@/lib/auth/rbac";
 import Link from "next/link";
-import { AquaSenseLogo } from "@/components/brand/aqua-sense-logo";
+import { AquaSenseBrandLockup } from "@/components/brand/aqua-sense-brand-lockup";
 import { Droplets, FileText, Settings, Cpu } from "lucide-react";
 
 export default async function AdminLayout({
@@ -33,10 +33,10 @@ export default async function AdminLayout({
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link
             href="/admin"
-            className="flex items-center gap-2"
-            aria-label="AquaSense admin"
+            className="flex flex-wrap items-center gap-x-2 gap-y-2"
+            aria-label="AquaSense admin — previously known as Waterview"
           >
-            <AquaSenseLogo decorative className="h-7 w-auto sm:h-8" />
+            <AquaSenseBrandLockup decorative />
             <span className="hidden text-sm font-medium text-muted sm:inline">
               Admin
             </span>

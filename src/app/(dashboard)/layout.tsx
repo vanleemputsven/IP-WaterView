@@ -4,7 +4,7 @@ import { ensureProfile } from "@/lib/services/profile-service";
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 import { canAccessAdmin } from "@/lib/auth/rbac";
 import Link from "next/link";
-import { AquaSenseLogo } from "@/components/brand/aqua-sense-logo";
+import { AquaSenseBrandLockup } from "@/components/brand/aqua-sense-brand-lockup";
 
 export default async function DashboardLayout({
   children,
@@ -31,10 +31,10 @@ export default async function DashboardLayout({
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link
             href="/dashboard"
-            className="flex items-center"
-            aria-label="AquaSense dashboard"
+            className="flex items-start sm:items-center"
+            aria-label="AquaSense dashboard — previously known as Waterview"
           >
-            <AquaSenseLogo decorative className="h-7 w-auto sm:h-8" />
+            <AquaSenseBrandLockup decorative />
           </Link>
           <DashboardNav isAdmin={isAdmin} />
         </div>
