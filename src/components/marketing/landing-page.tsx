@@ -9,7 +9,10 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { AquaSenseLogo } from "@/components/brand/aqua-sense-logo";
+import {
+  AquaSenseBrandLockup,
+  BRAND_LOCKUP_FOOTER_LOGO_CLASS,
+} from "@/components/brand/aqua-sense-brand-lockup";
 import {
   FitCheckLink,
   FitCheckTeaser,
@@ -82,10 +85,10 @@ export function LandingPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <Link
             href="/"
-            className="flex shrink-0 items-center transition-opacity hover:opacity-90"
-            aria-label="AquaSense home"
+            className="flex shrink-0 items-start transition-opacity hover:opacity-90 sm:items-center"
+            aria-label="AquaSense home — previously known as Waterview"
           >
-            <AquaSenseLogo decorative className="h-7 w-auto sm:h-8" />
+            <AquaSenseBrandLockup decorative />
           </Link>
 
           <nav
@@ -187,7 +190,7 @@ export function LandingPage() {
           <div className="relative mx-auto grid max-w-6xl gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
             <div>
               <h1 className="text-4xl font-bold tracking-tight text-fg sm:text-5xl lg:text-[2.75rem] lg:leading-[1.1]">
-                Sense every ripple. Act before problems surface.
+                Stay on top of your pool chemistry. Notice trouble before it spreads.
               </h1>
               <p className="mt-5 max-w-xl text-lg text-muted">
                 AquaSense connects your sensors to a modern monitoring experience:
@@ -474,9 +477,12 @@ export function LandingPage() {
             <Link
               href="/"
               className="w-fit transition-opacity hover:opacity-90"
-              aria-label="AquaSense home"
+              aria-label="AquaSense home — previously known as Waterview"
             >
-              <AquaSenseLogo decorative className="h-6 w-auto opacity-90" />
+              <AquaSenseBrandLockup
+                decorative
+                logoClassName={BRAND_LOCKUP_FOOTER_LOGO_CLASS}
+              />
             </Link>
             <p className="text-sm text-muted">
               © {new Date().getFullYear()} AquaSense. Pool monitoring, refined.

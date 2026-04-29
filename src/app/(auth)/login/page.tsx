@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LoginForm } from "./login-form";
-import { AquaSenseLogo } from "@/components/brand/aqua-sense-logo";
+import {
+  AquaSenseBrandLockup,
+  BRAND_LOCKUP_AUTH_LOGO_CLASS,
+} from "@/components/brand/aqua-sense-brand-lockup";
 
 export default async function LoginPage() {
   const supabase = await createClient();
@@ -18,7 +21,10 @@ export default async function LoginPage() {
       <div className="wv-panel max-w-sm space-y-6">
         <div className="space-y-4">
           <div className="flex justify-center">
-            <AquaSenseLogo className="h-10 w-auto" />
+            <AquaSenseBrandLockup
+              layout="stacked"
+              logoClassName={BRAND_LOCKUP_AUTH_LOGO_CLASS}
+            />
           </div>
           <h1 className="text-2xl font-bold text-fg">Sign in</h1>
         </div>
