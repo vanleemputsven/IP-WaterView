@@ -36,4 +36,7 @@ docs/design-tokens.md
 docs/email-templates.md
 docs/supabase-setup.md
 
+# Firmware — commit sketches; never commit Wi-Fi / API secrets
+firmware/secrets.h
 firmware/*
+

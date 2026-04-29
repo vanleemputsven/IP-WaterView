@@ -48,6 +48,10 @@ npm run dev
    - Redirect URLs: `http://localhost:3000/auth/callback`
 3. Enable Email auth in Authentication > Providers
 
+## ESP32 firmware
+
+Pool hardware sketches live in [`firmware/`](firmware/README.md): copy `secrets.h.example` to `secrets.h`, set WiFi and `INGEST_HOST` / `INGEST_API_KEY` (same key as Admin → Devices), then flash. See that README for OneWire/Dallas libraries and payload fields.
+
 ## Testing the measurement API
 
 1. Sign up at `/signup`

@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db/prisma";
 import { createHash } from "crypto";
 
 const API_KEY_HEADER = "x-device-token";
+/** Oudere firmware / docs gebruikten soms deze header naam. */
+const API_KEY_LEGACY_HEADER = "x-api-key";
 const BEARER_PREFIX = "Bearer ";
 
 function hashApiKey(plainKey: string): string {
@@ -10,11 +12,12 @@ function hashApiKey(plainKey: string): string {
 
 function getApiKeyFromRequest(request: Request): string | null {
   const header =
-    request.headers.get(API_KEY_HEADER) ??
+    request.headers.get(API_KEY_HEADER)?.trim() ||
+    request.headers.get(API_KEY_LEGACY_HEADER)?.trim() ||
     (request.headers.get("authorization")?.startsWith(BEARER_PREFIX)
       ? request.headers.get("authorization")!.slice(BEARER_PREFIX.length).trim()
       : null);
-  return header;
+  return header || null;
 }
 
 export async function resolveDeviceFromRequest(request: Request): Promise<{
