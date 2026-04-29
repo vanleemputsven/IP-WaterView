@@ -1,4 +1,4 @@
-# Supabase Setup for Waterview
+# Supabase Setup for AquaSense
 
 ## 1. Create a Supabase project
 
@@ -49,4 +49,4 @@ npx prisma migrate dev
 
 ## 5. Optional: Supabase RLS
 
-Waterview uses app-level authorization (Prisma + role checks). If you want to add Supabase RLS for direct Postgres access, create policies that align with our `Profile` and `Device` model.
+AquaSense uses app-level authorization (Prisma + role checks). If you want to add Supabase RLS for direct Postgres access, create policies that align with our `Profile` and `Device` model.
