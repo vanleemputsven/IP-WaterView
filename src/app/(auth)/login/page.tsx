@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { LoginForm } from "./login-form";
 import {
@@ -6,7 +7,15 @@ import {
   BRAND_LOCKUP_AUTH_LOGO_CLASS,
 } from "@/components/brand/aqua-sense-brand-lockup";
 
-export default async function LoginPage() {
+const loginSearchParamsSchema = z.object({
+  error: z.string().optional(),
+});
+
+type LoginPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -15,6 +24,12 @@ export default async function LoginPage() {
   if (user) {
     redirect("/dashboard");
   }
+
+  const raw = await searchParams;
+  const q = loginSearchParamsSchema.safeParse({
+    error: typeof raw.error === "string" ? raw.error : undefined,
+  });
+  const queryError = q.success ? q.data.error : undefined;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
@@ -28,7 +43,7 @@ export default async function LoginPage() {
           </div>
           <h1 className="text-2xl font-bold text-fg">Sign in</h1>
         </div>
-        <LoginForm />
+        <LoginForm queryError={queryError ?? null} />
       </div>
     </div>
   );
