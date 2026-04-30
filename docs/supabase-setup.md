@@ -29,13 +29,29 @@ DIRECT_URL="postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabas
 
 In Authentication > URL Configuration:
 
-- **Site URL**: `http://localhost:3000` (dev) or your production URL
-- **Redirect URLs**: Add `http://localhost:3000/auth/callback` and your production callback URL
+- **Site URL**: `http://localhost:3000` (dev) or your production origin (must match the URL users open in the browser)
+- **Redirect URLs**: Allowlist every origin that will complete OAuth, for example:
+  - `http://localhost:3000/auth/callback`
+  - `https://your-production-domain.com/auth/callback`
+  - If Supabase shows a wildcard option for the same path, you may use it so query parameters (for example `?next=/dashboard`) still match; otherwise add the exact URLs you use.
 
 In Authentication > Providers:
 
 - Enable **Email** provider
 - Optionally disable email confirmation for local dev (Authentication > Providers > Email > Confirm email)
+
+### Google (Sign in with Google)
+
+The app uses Supabase OAuth (`signInWithOAuth`) with the **Google** provider. No Google client secret is stored in this repository; Supabase holds provider credentials.
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), create or select a project.
+2. **APIs & Services** → **OAuth consent screen**: configure the app (type, support email, scopes; `openid`, `email`, and `profile` are sufficient for typical sign-in).
+3. **Credentials** → **Create credentials** → **OAuth client ID** → Application type **Web application**:
+   - **Authorized JavaScript origins**: not required for the server-side Supabase redirect flow; you may leave empty or add your site URL if you use other Google JS APIs.
+   - **Authorized redirect URIs**: add the value from Supabase **Authentication** → **Providers** → **Google** → **Callback URL** (looks like `https://<project-ref>.supabase.co/auth/v1/callback`). This is where Google sends the user after consent; Supabase then redirects to your app’s `/auth/callback`.
+4. Copy the **Client ID** and **Client secret** into Supabase **Authentication** → **Providers** → **Google**, and enable the provider.
+
+After a successful Google sign-in, the app exchanges the code at `/auth/callback` and creates or loads the user’s row in `profiles` on first dashboard visit (same as email sign-up).
 
 ## 4. Run migrations
 
