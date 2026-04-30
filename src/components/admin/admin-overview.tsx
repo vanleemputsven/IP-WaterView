@@ -5,7 +5,6 @@ import {
   ArrowRight,
   Cpu,
   FileText,
-  Settings,
   Users,
 } from "lucide-react";
 
@@ -80,39 +79,12 @@ export async function AdminOverview() {
     prisma.threshold.count(),
   ]);
 
-  const quickLinks = [
-    {
-      href: "/admin/devices",
-      title: "Devices",
-      description: "Register hardware, rotate keys, and review connectivity.",
-      icon: Cpu,
-    },
-    {
-      href: "/admin/logs",
-      title: "System logs",
-      description: "Audit trail for admin and device actions.",
-      icon: FileText,
-    },
-    {
-      href: "/admin/settings",
-      title: "Thresholds",
-      description: "Alert limits for pH, temperature, and sanitizer.",
-      icon: Settings,
-    },
-    {
-      href: "/dashboard",
-      title: "Pool dashboard",
-      description: "End-user view of live chemistry and history.",
-      icon: Activity,
-    },
-  ] as const;
-
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-fg">Admin overview</h1>
         <p className="mt-1 text-sm text-muted">
-          Platform health, activity, and shortcuts to operational tasks.
+          Platform health and recent activity.
         </p>
       </div>
 
@@ -239,7 +211,7 @@ export async function AdminOverview() {
           </div>
         </div>
 
-        <div className="space-y-6 lg:col-span-2">
+        <div className="lg:col-span-2">
           <div>
             <h2 className="text-lg font-semibold text-fg">Ingest status</h2>
             <div className="mt-3 space-y-3 rounded-xl border border-border-subtle bg-surface p-5">
@@ -309,39 +281,6 @@ export async function AdminOverview() {
                 </li>
               </ul>
             </div>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-semibold text-fg">Shortcuts</h2>
-            <ul className="mt-3 space-y-2">
-              {quickLinks.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface p-4 shadow-card transition-colors hover:border-accent/30 hover:bg-surface-alt"
-                    >
-                      <span className="mt-0.5 rounded-lg bg-surface-alt p-2 text-accent">
-                        <Icon className="h-4 w-4" aria-hidden />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-1 font-medium text-fg">
-                          {item.title}
-                          <ArrowRight
-                            className="h-3.5 w-3.5 shrink-0 text-muted"
-                            aria-hidden
-                          />
-                        </span>
-                        <span className="mt-0.5 block text-sm text-muted">
-                          {item.description}
-                        </span>
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
           </div>
         </div>
       </div>
