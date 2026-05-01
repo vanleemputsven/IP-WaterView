@@ -27,8 +27,11 @@ yarn-error.log*
 *.swp
 *.swo
 
-# Prisma
-prisma/migrations/*_migration_lock.toml
+# Prisma — commit the whole prisma/ tree (schema, migrations/*.sql, seed.ts,
+# migrations/migration_lock.toml). Needed for reproducible DB changes & CI.
+# Optional local SQLite experiments only:
+*.db
+*.db-journal
 
 docs/*
 docs/architecture.md

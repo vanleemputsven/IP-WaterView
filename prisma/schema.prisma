@@ -51,6 +51,8 @@ model Device {
 
   measurements Measurement[]
 
+  deviceThresholds DeviceThreshold[]
+
   @@unique([profileId, name])
   @@map("devices")
 }
@@ -100,6 +102,7 @@ model SystemLog {
 // Settings / Thresholds
 // ---------------------------------------------------------------------------
 
+/// Platform defaults: copied to each new device at registration (admin template).
 model Threshold {
   id        String   @id @default(cuid())
   key       String   @unique // e.g. "temperature_min", "ph_max", "chlorine_min"
@@ -108,4 +111,19 @@ model Threshold {
   updatedAt DateTime @updatedAt
 
   @@map("thresholds")
+}
+
+/// Per-device limits used for alerts and dashboards (may differ per sensor).
+model DeviceThreshold {
+  id        String   @id @default(cuid())
+  deviceId  String
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  key       String
+  value     Decimal  @db.Decimal(10, 4)
+  unit      String?
+  updatedAt DateTime @updatedAt
+
+  @@unique([deviceId, key])
+  @@index([deviceId])
+  @@map("device_thresholds")
 }

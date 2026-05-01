@@ -50,14 +50,28 @@ export async function POST(request: Request) {
   let device: { id: string; name: string };
 
   try {
-    device = await prisma.device.create({
-      data: {
-        name,
-        apiKeyHash,
-        profileId: profile.id,
-        isActive: true,
-      },
-      select: { id: true, name: true },
+    device = await prisma.$transaction(async (tx) => {
+      const d = await tx.device.create({
+        data: {
+          name,
+          apiKeyHash,
+          profileId: profile.id,
+          isActive: true,
+        },
+        select: { id: true, name: true },
+      });
+      const defaults = await tx.threshold.findMany();
+      if (defaults.length > 0) {
+        await tx.deviceThreshold.createMany({
+          data: defaults.map((t) => ({
+            deviceId: d.id,
+            key: t.key,
+            value: t.value,
+            unit: t.unit,
+          })),
+        });
+      }
+      return d;
     });
   } catch (e) {
     if (

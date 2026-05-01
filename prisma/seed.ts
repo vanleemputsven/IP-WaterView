@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { ensureDeviceThresholdsForDevice } from "../src/lib/services/threshold-service";
 
 const prisma = new PrismaClient();
 
@@ -21,6 +22,12 @@ async function main() {
       create: t,
       update: {},
     });
+  }
+
+  for (const { id } of await prisma.device.findMany({
+    select: { id: true },
+  })) {
+    await ensureDeviceThresholdsForDevice(id);
   }
 
   // Create sample system log

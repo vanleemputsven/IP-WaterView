@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import { formatDateTimeForDisplay } from "@/lib/format/datetime";
 import { CreateDeviceForm } from "@/components/admin/create-device-form";
@@ -54,6 +55,9 @@ export default async function AdminDevicesPage() {
                 Enabled
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted">
+                Limits
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted">
                 Actions
               </th>
             </tr>
@@ -75,6 +79,14 @@ export default async function AdminDevicesPage() {
                 </td>
                 <td className="px-4 py-3 align-middle">
                   <DeviceActiveToggle deviceId={d.id} isActive={d.isActive} />
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 text-right align-middle">
+                  <Link
+                    href={`/admin/devices/${encodeURIComponent(d.id)}/thresholds`}
+                    className="text-sm font-medium text-accent hover:text-accent-deep"
+                  >
+                    Edit
+                  </Link>
                 </td>
                 <td className="px-4 py-3 text-right align-middle">
                   <div className="inline-flex flex-wrap items-center justify-end gap-2 whitespace-normal">
