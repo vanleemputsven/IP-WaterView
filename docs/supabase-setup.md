@@ -40,6 +40,8 @@ In Authentication > Providers:
 - Enable **Email** provider
 - Optionally disable email confirmation for local dev (Authentication > Providers > Email > Confirm email)
 
+The sign-up UI treats three outcomes after `signUp`: an immediate session (user lands on the dashboard), no session but a **new** user with at least one identity (email confirmation required — we show an on-page notice), or an existing email (often **no session** and either **no user** or a user with **empty `identities`** — we redirect to `/login` with `error=signup_email_in_use` so the user sees a clear message instead of a silent bounce via `/dashboard`).
+
 ### Google (Sign in with Google)
 
 The app uses Supabase OAuth (`signInWithOAuth`) with the **Google** provider. No Google client secret is stored in this repository; Supabase holds provider credentials.

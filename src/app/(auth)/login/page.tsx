@@ -9,6 +9,7 @@ import {
 
 const loginSearchParamsSchema = z.object({
   error: z.string().optional(),
+  email: z.string().optional(),
 });
 
 type LoginPageProps = {
@@ -28,23 +29,26 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const raw = await searchParams;
   const q = loginSearchParamsSchema.safeParse({
     error: typeof raw.error === "string" ? raw.error : undefined,
+    email: typeof raw.email === "string" ? raw.email : undefined,
   });
   const queryError = q.success ? q.data.error : undefined;
+  const rawEmail = q.success ? q.data.email : undefined;
+  const prefillEmail =
+    rawEmail !== undefined ? z.string().trim().email().safeParse(rawEmail) : null;
+  const loginEmailHint = prefillEmail?.success ? prefillEmail.data : null;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
-      <div className="wv-panel max-w-sm space-y-6">
-        <div className="space-y-4">
-          <div className="flex justify-center">
-            <AquaSenseBrandLockup
-              layout="stacked"
-              logoClassName={BRAND_LOCKUP_AUTH_LOGO_CLASS}
-            />
-          </div>
-          <h1 className="text-2xl font-bold text-fg">Sign in</h1>
+    <div className="wv-panel space-y-6">
+      <div className="space-y-4">
+        <div className="flex justify-center">
+          <AquaSenseBrandLockup
+            layout="stacked"
+            logoClassName={BRAND_LOCKUP_AUTH_LOGO_CLASS}
+          />
         </div>
-        <LoginForm queryError={queryError ?? null} />
+        <h1 className="text-2xl font-bold text-fg">Sign in</h1>
       </div>
+      <LoginForm queryError={queryError ?? null} initialEmail={loginEmailHint} />
     </div>
   );
 }

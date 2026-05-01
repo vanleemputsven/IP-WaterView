@@ -75,6 +75,8 @@ body {
 
   html {
     scroll-behavior: smooth;
+    /* Reserve space for scrollbar so layout width stays stable when only some routes overflow */
+    scrollbar-gutter: stable;
   }
 
   @media (prefers-reduced-motion: reduce) {

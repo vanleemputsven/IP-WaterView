@@ -2,16 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  Cpu,
-  Droplets,
-  FileText,
-  History,
-  LayoutDashboard,
-  LogOut,
-  Settings,
-  Shield,
-} from "lucide-react";
+import { Droplets, History, LogOut, Shield } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface DashboardNavProps {
@@ -40,8 +31,6 @@ export function DashboardNav({ isAdmin }: DashboardNavProps) {
       : "text-muted hover:bg-surface-alt hover:text-fg";
     return `${base} ${state}`;
   };
-
-  const inAdmin = pathname.startsWith("/admin");
 
   return (
     <div className="flex max-w-full flex-col items-end gap-2">
@@ -75,30 +64,6 @@ export function DashboardNav({ isAdmin }: DashboardNavProps) {
           Sign out
         </button>
       </nav>
-
-      {isAdmin && inAdmin && (
-        <nav
-          className="flex max-w-full flex-wrap items-center justify-end gap-2 border-t border-border-subtle pt-2"
-          aria-label="Admin sections"
-        >
-          <Link href="/admin" className={navClass("/admin", { exact: true })}>
-            <LayoutDashboard className="h-4 w-4 shrink-0" />
-            Overview
-          </Link>
-          <Link href="/admin/logs" className={navClass("/admin/logs")}>
-            <FileText className="h-4 w-4 shrink-0" />
-            Logs
-          </Link>
-          <Link href="/admin/devices" className={navClass("/admin/devices")}>
-            <Cpu className="h-4 w-4 shrink-0" />
-            Devices
-          </Link>
-          <Link href="/admin/settings" className={navClass("/admin/settings")}>
-            <Settings className="h-4 w-4 shrink-0" />
-            Settings
-          </Link>
-        </nav>
-      )}
     </div>
   );
 }
