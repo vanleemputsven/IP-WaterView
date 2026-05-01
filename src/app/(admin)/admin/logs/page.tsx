@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/db/prisma";
 import { formatDateTimeForDisplay } from "@/lib/format/datetime";
+import {
+  collectDeviceActorIdsFromLogs,
+  fetchDeviceNameMap,
+  formatSystemLogActor,
+} from "@/lib/services/system-log-display";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +13,9 @@ export default async function AdminLogsPage() {
     orderBy: { createdAt: "desc" },
     take: 100,
   });
+
+  const deviceIds = collectDeviceActorIdsFromLogs(logs);
+  const deviceNames = await fetchDeviceNameMap(deviceIds);
 
   return (
     <div className="space-y-8">
@@ -37,19 +45,24 @@ export default async function AdminLogsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border-subtle">
-            {logs.map((log) => (
-              <tr key={log.id}>
-                <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
-                  {formatDateTimeForDisplay(log.createdAt)}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
-                  {log.actorType}
-                  {log.actorId ? `:${log.actorId.slice(0, 8)}` : ""}
-                </td>
-                <td className="px-4 py-3 text-sm text-fg-secondary">{log.action}</td>
-                <td className="px-4 py-3 text-sm text-muted">{log.resource ?? "-"}</td>
-              </tr>
-            ))}
+            {logs.map((log) => {
+              const actor = formatSystemLogActor(log, deviceNames);
+              return (
+                <tr key={log.id}>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
+                    {formatDateTimeForDisplay(log.createdAt)}
+                  </td>
+                  <td
+                    className="max-w-[14rem] truncate whitespace-nowrap px-4 py-3 text-sm text-fg-secondary"
+                    title={actor.title}
+                  >
+                    {actor.text}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-fg-secondary">{log.action}</td>
+                  <td className="px-4 py-3 text-sm text-muted">{log.resource ?? "-"}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         {logs.length === 0 && (

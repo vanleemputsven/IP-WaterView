@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import {
+  collectDeviceActorIdsFromLogs,
+  fetchDeviceNameMap,
+  formatSystemLogActor,
+} from "@/lib/services/system-log-display";
+import {
   Activity,
   ArrowRight,
   Cpu,
@@ -78,6 +83,9 @@ export async function AdminOverview() {
     }),
     prisma.threshold.count(),
   ]);
+
+  const deviceIdsForLogs = collectDeviceActorIdsFromLogs(recentLogs);
+  const deviceNamesForLogs = await fetchDeviceNameMap(deviceIdsForLogs);
 
   return (
     <div className="space-y-8">
@@ -181,25 +189,30 @@ export async function AdminOverview() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-subtle">
-                {recentLogs.map((log) => (
-                  <tr key={log.id}>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
-                      <span title={formatShortDate(log.createdAt)}>
-                        {formatRelativeTime(log.createdAt)}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
-                      {log.actorType}
-                      {log.actorId ? `:${log.actorId.slice(0, 8)}…` : ""}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-fg-secondary">
-                      {log.action}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-muted">
-                      {log.resource ?? "—"}
-                    </td>
-                  </tr>
-                ))}
+                {recentLogs.map((log) => {
+                  const actor = formatSystemLogActor(log, deviceNamesForLogs);
+                  return (
+                    <tr key={log.id}>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
+                        <span title={formatShortDate(log.createdAt)}>
+                          {formatRelativeTime(log.createdAt)}
+                        </span>
+                      </td>
+                      <td
+                        className="max-w-[12rem] truncate whitespace-nowrap px-4 py-3 text-sm text-fg-secondary"
+                        title={actor.title}
+                      >
+                        {actor.text}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-fg-secondary">
+                        {log.action}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted">
+                        {log.resource ?? "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             {recentLogs.length === 0 && (

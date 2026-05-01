@@ -9,15 +9,19 @@ import { GoogleOAuthButton } from "@/components/auth/google-oauth-button";
 const KNOWN_LOGIN_ERRORS: Record<string, string> = {
   auth_callback_error:
     "We could not finish signing you in. Please try again, or use email and password.",
+  signup_email_in_use:
+    "Er bestaat al een account met dit e-mailadres. Log hieronder in.",
 };
 
 type LoginFormProps = {
   /** Known error codes from the query string (e.g. failed OAuth callback) */
   queryError?: string | null;
+  /** Prefilled email (e.g. after duplicate sign-up redirect); must be validated server-side before passing */
+  initialEmail?: string | null;
 };
 
-export function LoginForm({ queryError }: LoginFormProps) {
-  const [email, setEmail] = useState("");
+export function LoginForm({ queryError, initialEmail }: LoginFormProps) {
+  const [email, setEmail] = useState(initialEmail ?? "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(
     queryError && KNOWN_LOGIN_ERRORS[queryError] ? KNOWN_LOGIN_ERRORS[queryError] : null
