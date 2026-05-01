@@ -130,7 +130,10 @@ export async function AdminOverview() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-border-subtle bg-surface p-5 shadow-card">
+        <Link
+          href="/admin/users"
+          className="block rounded-xl border border-border-subtle bg-surface p-5 shadow-card transition-colors hover:border-accent/40 hover:bg-surface-alt/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
           <div className="flex items-start justify-between gap-2">
             <p className="text-sm font-medium text-muted">Team</p>
             <Users className="h-4 w-4 shrink-0 text-accent" aria-hidden />
@@ -141,8 +144,10 @@ export async function AdminOverview() {
           <p className="mt-1 text-xs text-fg-secondary">
             <span className="font-medium text-fg">{adminCount}</span> admin
             {adminCount === 1 ? "" : "s"}
+            <span className="text-muted"> · </span>
+            <span className="font-medium text-accent">Manage roles</span>
           </p>
-        </div>
+        </Link>
 
         <div className="rounded-xl border border-border-subtle bg-surface p-5 shadow-card">
           <div className="flex items-start justify-between gap-2">
@@ -279,16 +284,24 @@ export async function AdminOverview() {
                   </li>
                 ) : null}
                 <li className="text-fg-secondary">
+                  Defaults template:{" "}
                   <span className="font-medium text-fg tabular-nums">
                     {thresholdCount}
                   </span>{" "}
-                  threshold
-                  {thresholdCount === 1 ? "" : "s"} configured —{" "}
+                  row
+                  {thresholdCount === 1 ? "" : "s"} (
                   <Link
                     href="/admin/settings"
                     className="font-medium text-accent hover:text-accent-deep"
                   >
-                    review limits
+                    Settings
+                  </Link>
+                  ). Per-device limits:{" "}
+                  <Link
+                    href="/admin/devices"
+                    className="font-medium text-accent hover:text-accent-deep"
+                  >
+                    Devices → Limits
                   </Link>
                   .
                 </li>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
-import { Cpu, FileText, LayoutDashboard, Settings } from "lucide-react";
+import { Cpu, FileText, LayoutDashboard, Settings, Users } from "lucide-react";
 
 type Section = {
   href: string;
@@ -16,6 +16,7 @@ const SECTIONS: Section[] = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/logs", label: "Logs", icon: FileText },
   { href: "/admin/devices", label: "Devices", icon: Cpu },
+  { href: "/admin/users", label: "Team", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
@@ -24,7 +25,7 @@ export function AdminSectionNav() {
 
   return (
     <nav aria-label="Admin sections" className="w-full min-w-0">
-      <ul className="grid grid-cols-2 gap-0.5 rounded-lg bg-accent-deep/35 p-0.5 ring-1 ring-white/20 sm:grid-cols-4">
+      <ul className="grid grid-cols-2 gap-0.5 rounded-lg bg-accent-deep/35 p-0.5 ring-1 ring-white/20 sm:grid-cols-3 lg:grid-cols-5">
         {SECTIONS.map(({ href, label, icon: Icon, exact }) => {
           const active = exact ? pathname === href : pathname.startsWith(href);
           return (
