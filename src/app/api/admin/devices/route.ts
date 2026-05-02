@@ -8,11 +8,24 @@ import { prisma } from "@/lib/db/prisma";
 import { hashApiKeyForStorage } from "@/lib/auth/device-auth";
 import { generateDeviceApiKey } from "@/lib/devices/generate-device-api-key";
 import { createLog } from "@/lib/services/log-service";
+import {
+  thresholdValueSchemaForKey,
+  validateThresholdKeyValueSet,
+} from "@/lib/validation/threshold";
 
 const postDeviceBodySchema = z
   .object({
     name: z.string().max(120).optional(),
     seedMeasurements: z.boolean().optional(),
+    initialThresholds: z
+      .array(
+        z.object({
+          key: z.string().min(1).max(64),
+          value: z.number().finite(),
+        }),
+      )
+      .max(32)
+      .optional(),
   })
   .strict();
 
@@ -43,7 +56,54 @@ export async function POST(request: Request) {
   const name = trimmedName.length > 0 ? trimmedName : "Pool Monitor";
   /** Demo measurements are opt-in only (`seedMeasurements: true`). */
   const seedMeasurements = parsed.data.seedMeasurements === true;
+  const rawOverrides = parsed.data.initialThresholds ?? [];
 
+  const defaultRows = await prisma.threshold.findMany({
+    orderBy: { key: "asc" },
+  });
+  const defaultKeySet = new Set(defaultRows.map((r) => r.key));
+
+  const overrideKeysSeen = new Set<string>();
+  for (const row of rawOverrides) {
+    if (overrideKeysSeen.has(row.key)) {
+      return NextResponse.json(
+        { error: `Duplicate threshold key in request: ${row.key}` },
+        { status: 400 },
+      );
+    }
+    overrideKeysSeen.add(row.key);
+    if (!defaultKeySet.has(row.key)) {
+      return NextResponse.json(
+        { error: `Unknown threshold key: ${row.key}` },
+        { status: 400 },
+      );
+    }
+  }
+
+  const overrideMap = new Map(rawOverrides.map((x) => [x.key, x.value]));
+
+  let mergedThresholds: { key: string; value: number }[] = [];
+  if (defaultRows.length > 0) {
+    mergedThresholds = defaultRows.map((t) => ({
+      key: t.key,
+      value: overrideMap.has(t.key) ? overrideMap.get(t.key)! : Number(t.value),
+    }));
+
+    for (const row of mergedThresholds) {
+      const schema = thresholdValueSchemaForKey(row.key);
+      const pv = schema.safeParse(row.value);
+      if (!pv.success) {
+        const msg =
+          pv.error.issues[0]?.message ?? `Invalid value for ${row.key}`;
+        return NextResponse.json({ error: msg }, { status: 422 });
+      }
+    }
+
+    const pairs = validateThresholdKeyValueSet(mergedThresholds);
+    if (!pairs.ok) {
+      return NextResponse.json({ error: pairs.message }, { status: 409 });
+    }
+  }
   const apiKey = generateDeviceApiKey();
   const apiKeyHash = hashApiKeyForStorage(apiKey);
 
@@ -60,14 +120,14 @@ export async function POST(request: Request) {
         },
         select: { id: true, name: true },
       });
-      const defaults = await tx.threshold.findMany();
+      const defaults = await tx.threshold.findMany({ orderBy: { key: "asc" } });
       if (defaults.length > 0) {
         await tx.deviceThreshold.createMany({
-          data: defaults.map((t) => ({
+          data: mergedThresholds.map((m) => ({
             deviceId: d.id,
-            key: t.key,
-            value: t.value,
-            unit: t.unit,
+            key: m.key,
+            value: m.value,
+            unit: defaults.find((t) => t.key === m.key)?.unit ?? null,
           })),
         });
       }
@@ -118,6 +178,7 @@ export async function POST(request: Request) {
       deviceId: device.id,
       name: device.name,
       seedDemoMeasurements: seedMeasurements,
+      initialThresholdOverrideCount: rawOverrides.length,
     },
   });
 

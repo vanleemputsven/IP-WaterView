@@ -8,16 +8,25 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { AlertTriangle, Check, Copy, KeyRound, X } from "lucide-react";
+import { AlertTriangle, KeyRound, X } from "lucide-react";
+import { DeviceCreatedApiKeyPanel } from "@/components/admin/device-created-api-key-panel";
 
 type Phase = "closed" | "confirm" | "reveal";
 
 type Props = {
   deviceId: string;
   deviceName: string;
+  toolbarSegment?: boolean;
 };
 
-export function DeviceApiKeyButton({ deviceId, deviceName }: Props) {
+const toolbarTriggerClass =
+  "flex min-h-9 w-full items-center justify-start gap-1.5 whitespace-nowrap px-3 py-2 text-xs font-medium text-accent transition-colors hover:bg-accent/10 focus-visible:relative focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/35 disabled:pointer-events-none disabled:opacity-50 xl:h-9 xl:w-9 xl:min-w-9 xl:max-w-9 xl:justify-center xl:gap-0 xl:p-0";
+
+export function DeviceApiKeyButton({
+  deviceId,
+  deviceName,
+  toolbarSegment = false,
+}: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const descId = useId();
@@ -26,7 +35,6 @@ export function DeviceApiKeyButton({ deviceId, deviceName }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [newKey, setNewKey] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   useLayoutEffect(() => {
     setPortalEl(document.body);
@@ -39,7 +47,6 @@ export function DeviceApiKeyButton({ deviceId, deviceName }: Props) {
     setPhase("closed");
     setError(null);
     setNewKey(null);
-    setCopied(false);
   }, [loading]);
 
   useLayoutEffect(() => {
@@ -102,17 +109,6 @@ export function DeviceApiKeyButton({ deviceId, deviceName }: Props) {
     setError(null);
     setNewKey(data.apiKey);
     setPhase("reveal");
-  }
-
-  async function copyKey() {
-    if (!newKey) return;
-    try {
-      await navigator.clipboard.writeText(newKey);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setError("Could not copy — select the key manually");
-    }
   }
 
   const dialog = (
@@ -233,27 +229,19 @@ export function DeviceApiKeyButton({ deviceId, deviceName }: Props) {
         {phase === "reveal" && newKey ? (
           <>
             <header className="flex shrink-0 items-start gap-2 border-b border-border-subtle px-4 py-3.5 sm:gap-3">
-              <div className="flex min-w-0 flex-1 gap-2.5 sm:gap-3">
-                <span
-                  className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent"
-                  aria-hidden
+              <div className="min-w-0 flex-1 pr-1">
+                <h2
+                  id={titleId}
+                  className="text-base font-semibold leading-snug text-fg break-words [overflow-wrap:anywhere]"
                 >
-                  <KeyRound className="h-4 w-4" strokeWidth={2} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted">
-                    Devices
-                  </p>
-                  <h2
-                    id={titleId}
-                    className="mt-1 text-base font-semibold leading-snug text-fg"
-                  >
-                    Save this API key
-                  </h2>
-                  <p id={descId} className="mt-0.5 text-sm text-muted">
-                    Copy it now — it will not be shown again.
-                  </p>
-                </div>
+                  {deviceName}
+                </h2>
+                <p id={descId} className="mt-1 text-sm text-muted">
+                  Shown once · header{" "}
+                  <code className="rounded bg-surface-alt px-1 py-0.5 font-mono text-xs text-fg-secondary">
+                    X-Device-Token
+                  </code>
+                </p>
               </div>
               <button
                 type="button"
@@ -265,17 +253,23 @@ export function DeviceApiKeyButton({ deviceId, deviceName }: Props) {
               </button>
             </header>
 
-            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3.5">
-              <div className="rounded-xl border border-success/30 bg-success/5 p-3 sm:p-4">
-                <p className="text-sm font-medium text-success">{deviceName}</p>
-                <pre className="mt-2 max-h-40 overflow-x-auto overflow-y-auto whitespace-pre-wrap break-all rounded-lg bg-code-bg px-3 py-2.5 font-mono text-sm text-inverse-fg">
-                  {newKey}
-                </pre>
-                <p className="mt-1.5 text-xs text-muted">
-                  Header:{" "}
-                  <span className="font-mono text-fg-secondary">X-Device-Token</span>
-                </p>
-              </div>
+            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-4 py-3.5">
+              <DeviceCreatedApiKeyPanel
+                deviceName={deviceName}
+                apiKey={newKey}
+                omitOuterShell
+                omitHeading
+                omitSubtitle
+                ariaLabel={`${deviceName}. New API secret shown once; use HTTP header X-Device-Token. The previous key no longer works.`}
+              >
+                <button
+                  type="button"
+                  onClick={close}
+                  className="wv-btn-primary w-full sm:w-auto"
+                >
+                  Done
+                </button>
+              </DeviceCreatedApiKeyPanel>
               {error ? (
                 <div
                   role="alert"
@@ -285,33 +279,6 @@ export function DeviceApiKeyButton({ deviceId, deviceName }: Props) {
                 </div>
               ) : null}
             </div>
-
-            <footer className="flex shrink-0 flex-col-reverse gap-2 border-t border-border-subtle px-4 py-3 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={copyKey}
-                className="wv-btn-secondary inline-flex w-full items-center justify-center gap-2 sm:w-auto"
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4 text-success" aria-hidden />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4" aria-hidden />
-                    Copy key
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={close}
-                className="wv-btn-primary w-full sm:w-auto"
-              >
-                Done
-              </button>
-            </footer>
           </>
         ) : null}
       </div>
@@ -325,12 +292,35 @@ export function DeviceApiKeyButton({ deviceId, deviceName }: Props) {
         onClick={() => {
           setError(null);
           setNewKey(null);
-          setCopied(false);
           setPhase("confirm");
         }}
-        className="inline-flex items-center justify-center rounded-lg border border-accent/35 bg-accent/5 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/10"
+        aria-label={
+          toolbarSegment
+            ? `Issue new API key for ${deviceName} (old key stops immediately)`
+            : undefined
+        }
+        className={
+          toolbarSegment
+            ? toolbarTriggerClass
+            : "inline-flex items-center justify-center rounded-lg border border-accent/35 bg-accent/5 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/10"
+        }
+        title={
+          toolbarSegment
+            ? "Issue a new API key (old key stops immediately)"
+            : undefined
+        }
       >
-        New API key
+        <KeyRound
+          className={`h-3.5 w-3.5 shrink-0 opacity-90 ${toolbarSegment ? "xl:h-4 xl:w-4" : ""}`}
+          aria-hidden
+        />
+        {toolbarSegment ? (
+          <span className="xl:hidden" aria-hidden>
+            API key
+          </span>
+        ) : (
+          "New API key"
+        )}
       </button>
       {portalEl && open ? createPortal(dialog, portalEl) : null}
     </>

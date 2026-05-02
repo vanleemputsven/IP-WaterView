@@ -140,7 +140,7 @@ AquaSense/
 - **Role** – Enum: USER, ADMIN
 - **Device** – IoT device; API key hash; belongs to user
 - **Measurement** – temperature, pH, chlorine (nullable); deviceId; timestamp
-- **SystemLog** – Audit/event log; actor, action, metadata
+- **SystemLog** – Audit/event log; actor, action, metadata. The admin logs page filters rows server-side via GET parameters (`actor`, `resource`, `action`), with Zod validation and allowlisting against distinct values from the database so only known resources/actions are applied.
 - **Threshold** – Min/max for temp, pH, chlorine; configurable
 
 ---

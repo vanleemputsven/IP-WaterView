@@ -5,9 +5,22 @@ import { createPortal } from "react-dom";
 import { Pencil, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-type Props = { deviceId: string; deviceName: string };
+type Props = {
+  deviceId: string;
+  deviceName: string;
+  /** Compact trigger aligned with other row actions (toolbar segment). */
+  toolbarSegment?: boolean;
+};
 
-export function RenameDeviceButton({ deviceId, deviceName }: Props) {
+/** Stacked below `xl`; horizontal row uses icon-only cells to save width. */
+const toolbarTriggerClass =
+  "flex min-h-9 w-full items-center justify-start gap-1.5 whitespace-nowrap px-3 py-2 text-xs font-medium text-fg-secondary transition-colors hover:bg-surface-alt hover:text-fg focus-visible:relative focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/35 disabled:pointer-events-none disabled:opacity-50 xl:h-9 xl:w-9 xl:min-w-9 xl:max-w-9 xl:justify-center xl:gap-0 xl:p-0";
+
+export function RenameDeviceButton({
+  deviceId,
+  deviceName,
+  toolbarSegment = false,
+}: Props) {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -202,9 +215,25 @@ export function RenameDeviceButton({ deviceId, deviceName }: Props) {
           setError(null);
           setOpen(true);
         }}
-        className="inline-flex items-center justify-center rounded-lg border border-border-subtle bg-surface px-3 py-1.5 text-xs font-medium text-fg-secondary transition-colors hover:bg-surface-alt"
+        aria-label={toolbarSegment ? `Rename ${deviceName}` : undefined}
+        title={toolbarSegment ? "Rename device" : undefined}
+        className={
+          toolbarSegment
+            ? toolbarTriggerClass
+            : "inline-flex items-center justify-center rounded-lg border border-border-subtle bg-surface px-3 py-1.5 text-xs font-medium text-fg-secondary transition-colors hover:bg-surface-alt"
+        }
       >
-        Rename
+        <Pencil
+          className={`h-3.5 w-3.5 shrink-0 opacity-80 ${toolbarSegment ? "xl:h-4 xl:w-4" : ""}`}
+          aria-hidden
+        />
+        {toolbarSegment ? (
+          <span className="xl:hidden" aria-hidden>
+            Rename
+          </span>
+        ) : (
+          "Rename"
+        )}
       </button>
       {portalEl && open ? createPortal(dialog, portalEl) : null}
     </>

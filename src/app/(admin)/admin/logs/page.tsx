@@ -1,21 +1,56 @@
 import { prisma } from "@/lib/db/prisma";
+import { AdminLogsFilterForm } from "@/components/admin/admin-logs-filter-form";
 import { formatDateTimeForDisplay } from "@/lib/format/datetime";
 import {
-  collectDeviceActorIdsFromLogs,
-  fetchDeviceNameMap,
+  buildSystemLogWhere,
+  listDistinctSystemLogActions,
+  listDistinctSystemLogResources,
+} from "@/lib/repositories/system-log-repository";
+import {
+  fetchActorNameMapsForLogs,
   formatSystemLogActor,
 } from "@/lib/services/system-log-display";
+import { resolveAdminLogsFilters } from "@/lib/validation/admin-logs";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminLogsPage() {
+type AdminLogsPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function AdminLogsPage({ searchParams }: AdminLogsPageProps) {
+  const raw = await searchParams;
+
+  const [resources, actions] = await Promise.all([
+    listDistinctSystemLogResources(),
+    listDistinctSystemLogActions(),
+  ]);
+
+  const resourceSet = new Set(resources);
+  const actionSet = new Set(actions);
+
+  const filters = resolveAdminLogsFilters(raw, resourceSet, actionSet);
+
+  const where = buildSystemLogWhere({
+    actorType: filters.actor,
+    resource: filters.resource,
+    action: filters.action,
+  });
+
   const logs = await prisma.systemLog.findMany({
+    where,
     orderBy: { createdAt: "desc" },
     take: 100,
   });
 
-  const deviceIds = collectDeviceActorIdsFromLogs(logs);
-  const deviceNames = await fetchDeviceNameMap(deviceIds);
+  const actorNameMaps = await fetchActorNameMapsForLogs(logs);
+
+  const emptyMessage =
+    filters.actor !== undefined ||
+    filters.resource !== undefined ||
+    filters.action !== undefined
+      ? "No logs match these filters."
+      : "No logs yet.";
 
   return (
     <div className="space-y-8">
@@ -27,6 +62,11 @@ export default async function AdminLogsPage() {
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border-subtle bg-surface">
+        <AdminLogsFilterForm
+          resources={resources}
+          actions={actions}
+          filters={filters}
+        />
         <table className="min-w-full divide-y divide-border-subtle">
           <thead>
             <tr>
@@ -46,7 +86,7 @@ export default async function AdminLogsPage() {
           </thead>
           <tbody className="divide-y divide-border-subtle">
             {logs.map((log) => {
-              const actor = formatSystemLogActor(log, deviceNames);
+              const actor = formatSystemLogActor(log, actorNameMaps);
               return (
                 <tr key={log.id}>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
@@ -67,7 +107,7 @@ export default async function AdminLogsPage() {
         </table>
         {logs.length === 0 && (
           <div className="px-4 py-8 text-center text-muted">
-            No logs yet.
+            {emptyMessage}
           </div>
         )}
       </div>

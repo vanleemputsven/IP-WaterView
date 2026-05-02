@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
 import {
-  collectDeviceActorIdsFromLogs,
-  fetchDeviceNameMap,
+  fetchActorNameMapsForLogs,
   formatSystemLogActor,
 } from "@/lib/services/system-log-display";
 import {
@@ -49,7 +48,6 @@ export async function AdminOverview() {
     latestMeasurement,
     neverSeenDeviceCount,
     staleDeviceCount,
-    thresholdCount,
   ] = await Promise.all([
     prisma.device.count(),
     prisma.device.count({ where: { isActive: true } }),
@@ -81,11 +79,9 @@ export async function AdminOverview() {
         isActive: true,
       },
     }),
-    prisma.threshold.count(),
   ]);
 
-  const deviceIdsForLogs = collectDeviceActorIdsFromLogs(recentLogs);
-  const deviceNamesForLogs = await fetchDeviceNameMap(deviceIdsForLogs);
+  const actorNameMaps = await fetchActorNameMapsForLogs(recentLogs);
 
   return (
     <div className="space-y-8">
@@ -195,7 +191,7 @@ export async function AdminOverview() {
               </thead>
               <tbody className="divide-y divide-border-subtle">
                 {recentLogs.map((log) => {
-                  const actor = formatSystemLogActor(log, deviceNamesForLogs);
+                  const actor = formatSystemLogActor(log, actorNameMaps);
                   return (
                     <tr key={log.id}>
                       <td className="whitespace-nowrap px-4 py-3 text-sm text-fg-secondary">
@@ -283,28 +279,6 @@ export async function AdminOverview() {
                     No connectivity warnings for active devices.
                   </li>
                 ) : null}
-                <li className="text-fg-secondary">
-                  Defaults template:{" "}
-                  <span className="font-medium text-fg tabular-nums">
-                    {thresholdCount}
-                  </span>{" "}
-                  row
-                  {thresholdCount === 1 ? "" : "s"} (
-                  <Link
-                    href="/admin/settings"
-                    className="font-medium text-accent hover:text-accent-deep"
-                  >
-                    Settings
-                  </Link>
-                  ). Per-device limits:{" "}
-                  <Link
-                    href="/admin/devices"
-                    className="font-medium text-accent hover:text-accent-deep"
-                  >
-                    Devices → Limits
-                  </Link>
-                  .
-                </li>
               </ul>
             </div>
           </div>
