@@ -42,11 +42,13 @@ export const patchThresholdBodySchema = z
 
 export type ThresholdKeyValue = { key: string; value: number };
 
-const ORDERED_PAIRS: readonly [string, string][] = [
+export const THRESHOLD_ORDERED_PAIRS: readonly [string, string][] = [
   ["temperature_min", "temperature_max"],
   ["ph_min", "ph_max"],
   ["chlorine_min", "chlorine_max"],
 ];
+
+const ORDERED_PAIRS = THRESHOLD_ORDERED_PAIRS;
 
 /**
  * Ensures min &lt; max for known paired thresholds after applying a pending change.
@@ -59,6 +61,32 @@ export function validateThresholdMinMaxPairs(
   map.set(pending.key, pending.value);
 
   for (const [minKey, maxKey] of ORDERED_PAIRS) {
+    const lo = map.get(minKey);
+    const hi = map.get(maxKey);
+    if (lo === undefined || hi === undefined) continue;
+    if (lo >= hi) {
+      let message = `${minKey} must be less than ${maxKey}.`;
+      if (minKey.startsWith("temperature_")) {
+        message = "Temperature min must be less than max.";
+      } else if (minKey.startsWith("ph_")) {
+        message = "pH min must be less than max.";
+      } else if (minKey.startsWith("chlorine_")) {
+        message = "Chlorine min must be less than max.";
+      }
+      return { ok: false, message };
+    }
+  }
+
+  return { ok: true };
+}
+
+/** Validates min &lt; max for all known pairs on a full merged set (e.g. device creation). */
+export function validateThresholdKeyValueSet(
+  rows: readonly ThresholdKeyValue[],
+): { ok: true } | { ok: false; message: string } {
+  const map = new Map(rows.map((r) => [r.key, r.value]));
+
+  for (const [minKey, maxKey] of THRESHOLD_ORDERED_PAIRS) {
     const lo = map.get(minKey);
     const hi = map.get(maxKey);
     if (lo === undefined || hi === undefined) continue;
