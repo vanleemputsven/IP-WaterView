@@ -123,6 +123,9 @@ export function DashboardHomeSkeleton() {
   );
 }
 
+const historyListGridCols =
+  "minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 0.65fr) minmax(0, 0.5fr) minmax(0, 0.75fr)";
+
 export function DashboardHistorySkeleton() {
   return (
     <AdminPageLoadingShell className="space-y-6">
@@ -136,6 +139,38 @@ export function DashboardHistorySkeleton() {
         <AdminSkeletonBlock className="mt-1.5 h-4 w-full max-w-xl" />
         <div className="mt-3">
           <MeasurementChartExpandedSkeleton />
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-border-subtle bg-surface">
+        <div className="border-b border-border-subtle bg-surface-alt/25 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <AdminSkeletonBlock className="h-8 w-[9rem]" />
+            <AdminSkeletonBlock className="h-8 min-w-[12rem] flex-1 sm:max-w-sm" />
+            <AdminSkeletonBlock className="h-8 w-16 sm:ml-auto" />
+          </div>
+        </div>
+        <div className="border-b border-border-subtle px-4 py-3">
+          <div className="grid gap-3" style={{ gridTemplateColumns: historyListGridCols }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <AdminSkeletonBlock key={i} className="h-3 w-14" />
+            ))}
+          </div>
+        </div>
+        <div className="divide-y divide-border-subtle px-4 py-3">
+          <div className="space-y-3">
+            {Array.from({ length: 10 }).map((_, ri) => (
+              <div
+                key={ri}
+                className="grid gap-3"
+                style={{ gridTemplateColumns: historyListGridCols }}
+              >
+                {Array.from({ length: 5 }).map((__, ci) => (
+                  <AdminSkeletonBlock key={ci} className="h-4 w-full" />
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </AdminPageLoadingShell>
