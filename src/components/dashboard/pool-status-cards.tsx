@@ -22,11 +22,11 @@ function boundsForDevice(
   return map?.[deviceId] ?? poolThresholdBoundsFromRows([]);
 }
 
-/** Left accent only — cards stay the same white surface as elsewhere. */
-function statusBorder(status: RangeStatus): string {
+/** Left accent aligned with measurement chart stat strips; danger when out of band. */
+function statusBorderLeft(status: RangeStatus): string {
   switch (status) {
     case "in_range":
-      return "border-l-success";
+      return "border-l-accent-bright";
     case "below":
     case "above":
       return "border-l-danger";
@@ -51,42 +51,52 @@ function statusPhrase(status: RangeStatus): string {
 function MetricTile({
   title,
   icon,
-  valueMain,
-  valueSuffix,
+  valuePrimary,
+  valueUnit,
+  targetRangeText,
   metricStatus,
-  targetLine,
   ariaLabel,
 }: {
   title: string;
   icon: ReactNode;
-  valueMain: string;
-  valueSuffix?: string;
+  valuePrimary: string;
+  valueUnit: string | null;
+  targetRangeText: string;
   metricStatus: RangeStatus;
-  targetLine: string;
   ariaLabel: string;
 }) {
+  const hasReading = valueUnit !== null;
+
   return (
     <div
-      className={`rounded-xl border border-border-subtle border-l-[3px] bg-surface p-5 shadow-card ${statusBorder(metricStatus)}`}
+      className={`rounded-md border border-border-subtle border-l-2 bg-surface px-3 py-2.5 ${statusBorderLeft(metricStatus)}`}
       role="status"
       aria-label={ariaLabel}
     >
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-medium text-muted">{title}</p>
+      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
         <span className="text-accent" aria-hidden>
           {icon}
         </span>
+        <span>{title}</span>
       </div>
-      <p className="mt-2 text-2xl font-bold tabular-nums text-fg">
-        {valueMain}
-        {valueSuffix ? (
-          <span className="text-lg font-semibold text-fg-secondary">
-            {" "}
-            {valueSuffix}
+      <p className="mt-2 flex flex-wrap items-baseline gap-x-1.5 gap-y-0 tabular-nums leading-none">
+        <span className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">
+          {valuePrimary}
+        </span>
+        {hasReading ? (
+          <span className="text-sm font-medium text-fg-secondary sm:text-base">
+            {valueUnit}
           </span>
         ) : null}
       </p>
-      <p className="mt-1 text-xs text-muted">{targetLine}</p>
+      <div className="mt-2.5 border-t border-border-subtle/90 pt-2">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-muted">
+          Target
+        </p>
+        <p className="mt-0.5 text-xs tabular-nums leading-snug text-fg-secondary sm:text-sm">
+          {targetRangeText}
+        </p>
+      </div>
     </div>
   );
 }
@@ -128,32 +138,41 @@ export function PoolStatusCards({
   const clMain =
     latest.chlorinePpm === null ? "—" : latest.chlorinePpm.toFixed(2);
 
+  const tempPrimary = tempMain;
+  const tempUnit =
+    latest.temperatureCelsius === null ? null : "°C";
+  const phPrimary = phMain;
+  const phUnit = latest.ph === null ? null : "pH";
+  const clPrimary = clMain;
+  const clUnit = latest.chlorinePpm === null ? null : "ppm";
+
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3 sm:gap-2">
       <MetricTile
         title="Temperature"
-        icon={<Thermometer className="h-4 w-4 shrink-0" aria-hidden />}
-        valueMain={tempMain}
-        valueSuffix={latest.temperatureCelsius !== null ? "°C" : undefined}
+        icon={<Thermometer className="h-3 w-3 shrink-0" aria-hidden />}
+        valuePrimary={tempPrimary}
+        valueUnit={tempUnit}
+        targetRangeText={`${bounds.temperature.min}–${bounds.temperature.max} °C`}
         metricStatus={tempStatus}
-        targetLine={`Target ${bounds.temperature.min}–${bounds.temperature.max} °C`}
         ariaLabel={`Temperature ${tempMain}, ${statusPhrase(tempStatus)}, target ${bounds.temperature.min} to ${bounds.temperature.max} celsius`}
       />
       <MetricTile
         title="pH"
-        icon={<FlaskConical className="h-4 w-4 shrink-0" aria-hidden />}
-        valueMain={phMain}
+        icon={<FlaskConical className="h-3 w-3 shrink-0" aria-hidden />}
+        valuePrimary={phPrimary}
+        valueUnit={phUnit}
+        targetRangeText={`${bounds.ph.min.toFixed(1)}–${bounds.ph.max.toFixed(1)}`}
         metricStatus={phStatus}
-        targetLine={`Target ${bounds.ph.min.toFixed(1)}–${bounds.ph.max.toFixed(1)}`}
         ariaLabel={`pH ${phMain}, ${statusPhrase(phStatus)}, target ${bounds.ph.min} to ${bounds.ph.max}`}
       />
       <MetricTile
         title="Chlorine"
-        icon={<Droplets className="h-4 w-4 shrink-0" aria-hidden />}
-        valueMain={clMain}
-        valueSuffix={latest.chlorinePpm !== null ? "ppm" : undefined}
+        icon={<Droplets className="h-3 w-3 shrink-0" aria-hidden />}
+        valuePrimary={clPrimary}
+        valueUnit={clUnit}
+        targetRangeText={`${bounds.chlorine.min}–${bounds.chlorine.max} ppm`}
         metricStatus={clStatus}
-        targetLine={`Target ${bounds.chlorine.min}–${bounds.chlorine.max} ppm`}
         ariaLabel={`Chlorine ${clMain} ppm, ${statusPhrase(clStatus)}, target ${bounds.chlorine.min} to ${bounds.chlorine.max}`}
       />
     </div>
