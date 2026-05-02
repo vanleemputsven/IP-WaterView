@@ -21,21 +21,29 @@ export default async function HistoryPage() {
   const measurementsRaw = await prisma.measurement.findMany({
     where: { deviceId: { in: devices.map((d) => d.id) } },
     orderBy: { timestamp: "desc" },
-    take: 500,
+    take: 2500,
     include: { device: true },
   });
   const measurements = measurementsRaw.map(mapMeasurementToClient);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-fg">Measurement history</h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-0.5 max-w-3xl text-sm text-muted">
           Historical pool measurements over time
         </p>
       </div>
 
-      <MeasurementChart measurements={measurements} />
+      <div className="rounded-xl border border-border-subtle bg-surface p-4 sm:p-5">
+        <h2 className="text-sm font-medium text-fg">Chart</h2>
+        <p className="mt-0.5 max-w-3xl text-sm text-muted">
+          Up to 2 500 samples — metric, range, device, and brush zoom below.
+        </p>
+        <div className="mt-3">
+          <MeasurementChart measurements={measurements} variant="expanded" />
+        </div>
+      </div>
     </div>
   );
 }

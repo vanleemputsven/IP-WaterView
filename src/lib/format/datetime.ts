@@ -19,3 +19,30 @@ export function formatDateTimeForDisplay(
   if (Number.isNaN(date.getTime())) return "-";
   return dateTimeFormatter.format(date);
 }
+
+/** Compact axis labels for charts (Europe/Amsterdam, nl-NL). */
+export function formatChartAxisTick(
+  epochMs: number,
+  opts: { spanMs: number },
+): string {
+  const d = new Date(epochMs);
+  if (Number.isNaN(d.getTime())) return "";
+
+  const showDate = opts.spanMs > 36 * 60 * 60 * 1000;
+
+  if (showDate) {
+    return new Intl.DateTimeFormat(DISPLAY_LOCALE, {
+      timeZone: DISPLAY_TIME_ZONE,
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(d);
+  }
+
+  return new Intl.DateTimeFormat(DISPLAY_LOCALE, {
+    timeZone: DISPLAY_TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(d);
+}
