@@ -7,7 +7,6 @@ import {
   Legend,
   Line,
   LineChart,
-  ReferenceArea,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -43,10 +42,6 @@ const RANGE_MS: Record<Exclude<RangeId, "all">, number> = {
   "7d": 7 * 24 * 60 * 60 * 1000,
   "30d": 30 * 24 * 60 * 60 * 1000,
 };
-
-/** Typical residential pool guidance — visual hint only, not professional advice. */
-const TARGET_PH = { min: 7.2, max: 7.6 };
-const TARGET_CHLORINE_PPM = { min: 1, max: 3 };
 
 const MULTI_LINE_STROKES = [
   "var(--chart-brand-accent)",
@@ -203,13 +198,8 @@ function yPadding(metric: MetricId, values: number[]): [number, number] {
   const pad = Math.max(span * 0.12, metric === "ph" ? 0.05 : span * 0.02);
   let low = min - pad;
   let high = max + pad;
-  if (metric === "ph") {
-    low = Math.min(low, TARGET_PH.min - 0.15);
-    high = Math.max(high, TARGET_PH.max + 0.15);
-  }
   if (metric === "chlorine") {
-    low = Math.max(0, Math.min(low, TARGET_CHLORINE_PPM.min - 0.25));
-    high = Math.max(high, TARGET_CHLORINE_PPM.max + 0.5);
+    low = Math.max(0, low);
   }
   return [low, high];
 }
@@ -369,17 +359,6 @@ export function MeasurementChart({
     return { min, max, avg, latest };
   }, [values, scoped, metric]);
 
-  const metricHint = useMemo(() => {
-    switch (metric) {
-      case "ph":
-        return `Typical target band ~${TARGET_PH.min}–${TARGET_PH.max} (shaded).`;
-      case "chlorine":
-        return `Typical free chlorine ~${TARGET_CHLORINE_PPM.min}–${TARGET_CHLORINE_PPM.max} ppm (shaded). Guidance varies by pool type.`;
-      default:
-        return "Swim comfort depends on heater and preference — values are shown as measured.";
-    }
-  }, [metric]);
-
   const chartHeight = variant === "expanded" ? 352 : 248;
   const showBrush = variant === "expanded" && chartRows.length > 24;
 
@@ -520,9 +499,6 @@ export function MeasurementChart({
           ) : null}
         </div>
 
-        <p className="mt-2 border-t border-accent-bright/15 pt-2 text-[11px] leading-snug text-muted">
-          {metricHint}
-        </p>
       </div>
 
       {stats ? (
@@ -621,24 +597,6 @@ export function MeasurementChart({
                     },
                   }}
                 />
-                {metric === "ph" ? (
-                  <ReferenceArea
-                    y1={TARGET_PH.min}
-                    y2={TARGET_PH.max}
-                    strokeOpacity={0}
-                    fill="var(--chart-ph)"
-                    fillOpacity={0.12}
-                  />
-                ) : null}
-                {metric === "chlorine" ? (
-                  <ReferenceArea
-                    y1={TARGET_CHLORINE_PPM.min}
-                    y2={TARGET_CHLORINE_PPM.max}
-                    strokeOpacity={0}
-                    fill="var(--chart-chlorine)"
-                    fillOpacity={0.12}
-                  />
-                ) : null}
                 <Tooltip
                   content={(tooltipProps) => (
                     <ChartTooltipBody

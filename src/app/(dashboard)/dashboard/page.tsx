@@ -70,28 +70,41 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-border-subtle bg-surface p-4 sm:p-5">
-        <h2 className="text-sm font-medium text-fg">Pool status</h2>
-        <p className="mt-0.5 max-w-3xl text-sm text-muted">
-          Latest readings compared to your device limits.
-        </p>
-        <div className="mt-3">
+      <section className="relative overflow-hidden rounded-2xl border border-border-subtle bg-surface p-4 shadow-card sm:p-5">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-bright/35 to-transparent"
+          aria-hidden
+        />
+        <div className="relative flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight text-fg">
+              Pool status
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">
+              Latest readings compared to your device limits.
+            </p>
+          </div>
+        </div>
+        <div className="relative mt-4">
           <PoolStatusCards
             measurements={latestMeasurements}
             thresholdsByDeviceId={thresholdsByDeviceId}
           />
         </div>
-      </div>
+      </section>
 
-      <div className="rounded-xl border border-border-subtle bg-surface p-4 sm:p-5">
-        <h2 className="text-sm font-medium text-fg">Recent history</h2>
-        <p className="mt-0.5 max-w-3xl text-sm text-muted">
-          Up to 750 samples — pick metric, range, and device below.
-        </p>
-        <div className="mt-3">
+      <section className="relative overflow-hidden rounded-2xl border border-border-subtle bg-surface p-4 shadow-card sm:p-5">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-bright/25 to-transparent"
+          aria-hidden
+        />
+        <h2 className="relative text-lg font-semibold tracking-tight text-fg">
+          Recent history
+        </h2>
+        <div className="relative mt-3">
           <MeasurementChart measurements={recentMeasurements} variant="compact" />
         </div>
-      </div>
+      </section>
     </div>
   );
 }

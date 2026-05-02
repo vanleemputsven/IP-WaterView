@@ -1,5 +1,35 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import type { Decimal } from "@prisma/client/runtime/library";
+
+export type MeasurementHistoryListFilters = {
+  deviceIds: readonly string[];
+  deviceId?: string;
+  metric?: "temperature" | "ph" | "chlorine";
+};
+
+export function buildMeasurementHistoryWhere(
+  filters: MeasurementHistoryListFilters,
+): Prisma.MeasurementWhereInput {
+  const scopedIds =
+    filters.deviceId !== undefined && filters.deviceIds.includes(filters.deviceId)
+      ? [filters.deviceId]
+      : [...filters.deviceIds];
+
+  const where: Prisma.MeasurementWhereInput = {
+    deviceId: scopedIds.length > 0 ? { in: scopedIds } : { in: ["__none__"] },
+  };
+
+  if (filters.metric === "temperature") {
+    where.temperatureCelsius = { not: null };
+  } else if (filters.metric === "ph") {
+    where.ph = { not: null };
+  } else if (filters.metric === "chlorine") {
+    where.chlorinePpm = { not: null };
+  }
+
+  return where;
+}
 
 export type CreateMeasurementInput = {
   deviceId: string;
