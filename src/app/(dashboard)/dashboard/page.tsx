@@ -73,7 +73,7 @@ export default async function DashboardPage() {
       <div className="rounded-xl border border-border-subtle bg-surface p-4 sm:p-5">
         <h2 className="text-sm font-medium text-fg">Pool status</h2>
         <p className="mt-0.5 max-w-3xl text-sm text-muted">
-          Latest readings compared to your device limits (Admin → sensor limits).
+          Latest readings compared to your device limits.
         </p>
         <div className="mt-3">
           <PoolStatusCards

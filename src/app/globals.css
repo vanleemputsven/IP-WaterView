@@ -143,4 +143,12 @@ body {
   .wv-card-interactive {
     @apply wv-card transition-all duration-200 ease-out motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-lg motion-safe:hover:border-accent-bright/30;
   }
+
+  /*
+   * Recharts brush (history chart): default slide uses stroke @ 20% opacity — reads washed out / sky-like.
+   * Tie selection window to primary accent with explicit fill.
+   */
+  .recharts-brush-aquasense .recharts-brush-slide {
+    fill: rgb(var(--color-accent-deep) / 0.48);
+  }
 }

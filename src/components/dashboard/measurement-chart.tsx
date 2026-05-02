@@ -683,7 +683,8 @@ export function MeasurementChart({
                   <Brush
                     dataKey="time"
                     height={18}
-                    stroke="rgb(var(--color-accent-bright))"
+                    className="recharts-brush-aquasense"
+                    stroke="rgb(var(--color-accent-deep))"
                     travellerWidth={7}
                     tickFormatter={(v: number) =>
                       formatChartAxisTick(v, { spanMs })
