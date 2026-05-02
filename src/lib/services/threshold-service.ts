@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/db/prisma";
 import {
+  poolThresholdBoundsFromRows,
+  type PoolThresholdBounds,
+} from "@/lib/pool/threshold-bounds";
+import {
   thresholdValueSchemaForKey,
   validateThresholdMinMaxPairs,
   type ThresholdKeyValue,
@@ -38,6 +42,36 @@ export async function ensureDeviceThresholdsForDevice(
   const n = await prisma.deviceThreshold.count({ where: { deviceId } });
   if (n > 0) return;
   await copyPlatformThresholdsToDevice(deviceId);
+}
+
+/** Resolved min/max per metric per device (missing rows → platform defaults). */
+export async function fetchPoolThresholdBoundsByDeviceIds(
+  deviceIds: readonly string[],
+): Promise<Record<string, PoolThresholdBounds>> {
+  const unique = [...new Set(deviceIds)].filter(Boolean);
+  if (unique.length === 0) return {};
+
+  const rows = await prisma.deviceThreshold.findMany({
+    where: { deviceId: { in: unique } },
+    select: { deviceId: true, key: true, value: true },
+  });
+
+  const byDevice = new Map<string, Array<{ key: string; value: unknown }>>();
+  for (const id of unique) {
+    byDevice.set(id, []);
+  }
+  for (const r of rows) {
+    const list = byDevice.get(r.deviceId);
+    if (list) {
+      list.push({ key: r.key, value: r.value });
+    }
+  }
+
+  const out: Record<string, PoolThresholdBounds> = {};
+  for (const id of unique) {
+    out[id] = poolThresholdBoundsFromRows(byDevice.get(id) ?? []);
+  }
+  return out;
 }
 
 export async function updateThresholdValue(params: {

@@ -42,6 +42,11 @@
   --chart-ph: #16a34a;
   --chart-chlorine: #ca8a04;
   --chart-grid: #e2e8f0;
+  /* Primary series line — matches brand accent-bright (teal / blue-green) */
+  --chart-brand-accent: #0d9488;
+  --chart-series-2: #2563eb;
+  --chart-series-3: #7c3aed;
+  --chart-series-4: #db2777;
 
   /* Radii */
   --radius-sm: 0.375rem;
