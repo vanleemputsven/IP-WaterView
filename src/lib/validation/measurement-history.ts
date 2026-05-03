@@ -48,7 +48,7 @@ export function resolveDeviceQueryParam(
     : undefined;
 }
 
-/** Dashboard home URLs share the same `device` query key as `/dashboard/history`. */
+/** Dashboard home URLs share the same `device` query key as `/dashboard/measurements`. */
 export function buildDashboardHref(opts: { deviceId?: string }): string {
   if (!opts.deviceId) return "/dashboard";
   const p = new URLSearchParams();
@@ -90,7 +90,7 @@ export function resolveMeasurementHistoryQuery(
   return { deviceId, metric, pageRequested, pageSize };
 }
 
-/** Stable dashboard history URLs: omit default page size and page 1 for shorter query strings. */
+/** Stable measurements URLs: omit default page size and page 1 for shorter query strings. */
 export function buildMeasurementHistoryHref(opts: {
   deviceId?: string;
   metric?: "temperature" | "ph" | "chlorine";
@@ -105,5 +105,5 @@ export function buildMeasurementHistoryHref(opts: {
   }
   if (opts.page > 1) p.set("page", String(opts.page));
   const q = p.toString();
-  return q ? `/dashboard/history?${q}` : "/dashboard/history";
+  return q ? `/dashboard/measurements?${q}` : "/dashboard/measurements";
 }

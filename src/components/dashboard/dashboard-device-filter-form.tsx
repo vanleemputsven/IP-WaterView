@@ -14,7 +14,7 @@ const filterSelectClass =
   "min-h-8 min-w-0 max-w-[14rem] shrink-0 rounded-md border border-border-subtle bg-surface px-2 py-1 text-sm text-fg-secondary shadow-none sm:max-w-[16rem]";
 
 /**
- * GET form — same query key (`device`) and labels as `/dashboard/history` so bookmarks and deep links line up.
+ * GET form — same query key (`device`) and labels as `/dashboard/measurements` so bookmarks and deep links line up.
  */
 export function DashboardDeviceFilterForm({
   devices,

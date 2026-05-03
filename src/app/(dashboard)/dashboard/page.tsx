@@ -145,7 +145,7 @@ export default async function DashboardPage({
         <div className="relative flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold tracking-tight text-fg">
-              Recent history
+              Recent measurements
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-muted">
               Recent samples for the current scope.{" "}
@@ -157,7 +157,7 @@ export default async function DashboardPage({
                 })}
                 className="text-accent underline-offset-2 hover:underline"
               >
-                Open full measurement history
+                View all measurements
               </Link>
               .
             </p>
