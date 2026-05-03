@@ -7,11 +7,13 @@ import { formatDateTimeForDisplay } from "@/lib/format/datetime";
 import { mapMeasurementToClient } from "@/lib/mappers/measurement-client";
 import { buildMeasurementHistoryWhere } from "@/lib/repositories/measurement-repository";
 import { getProfileByUserId } from "@/lib/services/profile-service";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
+  buildDashboardHref,
   buildMeasurementHistoryHref,
   resolveMeasurementHistoryQuery,
 } from "@/lib/validation/measurement-history";
-import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -115,12 +117,22 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
         <p className="mt-0.5 max-w-3xl text-sm text-muted">
           Historical pool measurements over time
         </p>
+        {query.deviceId !== undefined ? (
+          <p className="mt-2 text-xs text-muted">
+            <Link
+              href={buildDashboardHref({ deviceId: query.deviceId })}
+              className="text-accent underline-offset-2 hover:underline"
+            >
+              Dashboard overview for this device
+            </Link>
+          </p>
+        ) : null}
       </div>
 
       <div className="rounded-xl border border-border-subtle bg-surface p-4 sm:p-5">
         <h2 className="text-sm font-medium text-fg">Chart</h2>
         <p className="mt-0.5 max-w-3xl text-sm text-muted">
-          Up to {CHART_SAMPLE_LIMIT.toLocaleString("nl-NL")} most recent samples
+          Up to {CHART_SAMPLE_LIMIT.toLocaleString("en-US")} most recent samples
           for the current filters — enough to see trends without loading the full
           dataset. Use the table below for paged rows.
         </p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import {
   Brush,
   CartesianGrid,
@@ -72,6 +72,21 @@ function segmentBtn(active: boolean): string {
 interface MeasurementChartProps {
   measurements: ClientMeasurement[];
   variant?: "compact" | "expanded";
+}
+
+function usePrefersReducedMotion(): boolean {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(true);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setPrefersReducedMotion(media.matches);
+
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  return prefersReducedMotion;
 }
 
 function deviceLabel(m: ClientMeasurement): string {
@@ -271,6 +286,8 @@ export function MeasurementChart({
   measurements,
   variant = "compact",
 }: MeasurementChartProps) {
+  const chartId = useId().replace(/:/g, "");
+  const prefersReducedMotion = usePrefersReducedMotion();
   const parseResult = useMemo(() => {
     const result = MeasurementsSchema.safeParse(measurements);
     if (!result.success) {
@@ -282,9 +299,8 @@ export function MeasurementChart({
   const safeMeasurements = parseResult.data;
 
   const [metric, setMetric] = useState<MetricId>("temperature");
-  const [range, setRange] = useState<RangeId>(
-    variant === "expanded" ? "7d" : "24h",
-  );
+  /** 7-day default avoids an empty chart when ingest is slower than 24 h intervals. */
+  const [range, setRange] = useState<RangeId>("7d");
   const [deviceId, setDeviceId] = useState<string>("all");
 
   const filtered = useMemo(
@@ -292,15 +308,16 @@ export function MeasurementChart({
     [safeMeasurements, range],
   );
 
+  /** From full loaded series so range/device controls stay available when the current window is empty. */
   const deviceOptions = useMemo(() => {
     const map = new Map<string, string>();
-    for (const m of filtered) {
+    for (const m of safeMeasurements) {
       if (!map.has(m.deviceId)) map.set(m.deviceId, deviceLabel(m));
     }
     return [...map.entries()].sort((a, b) =>
       a[1].localeCompare(b[1], "nl"),
     );
-  }, [filtered]);
+  }, [safeMeasurements]);
 
   const scoped = useMemo(() => {
     if (deviceId === "all") return filtered;
@@ -359,8 +376,9 @@ export function MeasurementChart({
     return { min, max, avg, latest };
   }, [values, scoped, metric]);
 
-  const chartHeight = variant === "expanded" ? 352 : 248;
-  const showBrush = variant === "expanded" && chartRows.length > 24;
+  const showBrush = chartRows.length > 24;
+  const chartHeight = variant === "expanded" ? 352 : showBrush ? 288 : 248;
+  const lineAnimationDuration = variant === "expanded" ? 900 : 700;
 
   if (!parseResult.ok) {
     return (
@@ -378,42 +396,21 @@ export function MeasurementChart({
     );
   }
 
-  if (filtered.length === 0) {
-    return (
-      <div className="space-y-2">
-        <div
-          className={SEGMENT_GROUP}
-          role="group"
-          aria-label="Metric"
-        >
-          {(
-            [
-              ["temperature", "Temperature"],
-              ["ph", "pH"],
-              ["chlorine", "Chlorine"],
-            ] as const
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              className={segmentBtn(metric === id)}
-              onClick={() => setMetric(id)}
-              aria-pressed={metric === id}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="rounded-lg border border-dashed border-border-subtle bg-surface-alt/50 px-3 py-8 text-center text-sm text-muted">
-          No samples in this time window. Choose a wider range or check device activity.
-        </div>
-      </div>
-    );
-  }
+  const emptyChartMessage =
+    scoped.length === 0
+      ? filtered.length === 0
+        ? "No samples in this time window. Choose a wider range or check device activity."
+        : 'No samples for this device in the selected time window. Try "All devices" or a wider range.'
+      : "No numeric readings for this metric in the current filters.";
+
+  const seriesStroke = (index: number) =>
+    activeSeries.length === 1
+      ? METRIC_STROKE[metric]
+      : MULTI_LINE_STROKES[index % MULTI_LINE_STROKES.length];
 
   return (
-    <div className="space-y-2">
-      <div className="rounded-lg border border-accent-bright/25 bg-gradient-to-br from-accent/[0.07] via-surface to-surface p-2 sm:p-2.5">
+    <div className="overflow-hidden rounded-xl border border-accent-bright/25 bg-gradient-to-br from-accent/[0.06] via-surface to-surface shadow-sm ring-1 ring-accent-bright/10 transition-shadow duration-300 ease-out hover:shadow-card motion-safe:animate-dashboard-card-in motion-reduce:animate-none">
+      <div className="border-b border-border-subtle px-2.5 py-2 sm:px-3 sm:py-2.5">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
             <span className="w-12 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-accent">
@@ -498,12 +495,12 @@ export function MeasurementChart({
             </div>
           ) : null}
         </div>
-
       </div>
 
       {stats ? (
-        <dl className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
-          <div className="rounded-md border border-border-subtle border-l-2 border-accent-bright bg-surface px-2 py-1.5">
+        <div className="border-b border-border-subtle bg-surface-alt/30 px-2.5 py-2 sm:px-3">
+          <dl className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
+          <div className="rounded-md border border-border-subtle bg-surface px-2 py-1.5">
             <dt className="text-[10px] font-semibold uppercase tracking-wide text-accent">
               Min
             </dt>
@@ -511,7 +508,7 @@ export function MeasurementChart({
               {formatMetricValue(metric, stats.min)}
             </dd>
           </div>
-          <div className="rounded-md border border-border-subtle border-l-2 border-accent-bright bg-surface px-2 py-1.5">
+          <div className="rounded-md border border-border-subtle bg-surface px-2 py-1.5">
             <dt className="text-[10px] font-semibold uppercase tracking-wide text-accent">
               Max
             </dt>
@@ -519,7 +516,7 @@ export function MeasurementChart({
               {formatMetricValue(metric, stats.max)}
             </dd>
           </div>
-          <div className="rounded-md border border-border-subtle border-l-2 border-accent-bright bg-surface px-2 py-1.5">
+          <div className="rounded-md border border-border-subtle bg-surface px-2 py-1.5">
             <dt className="text-[10px] font-semibold uppercase tracking-wide text-accent">
               Avg
             </dt>
@@ -527,7 +524,7 @@ export function MeasurementChart({
               {formatMetricValue(metric, stats.avg)}
             </dd>
           </div>
-          <div className="rounded-md border border-border-subtle border-l-2 border-accent-bright bg-surface px-2 py-1.5">
+          <div className="rounded-md border border-border-subtle bg-surface px-2 py-1.5">
             <dt className="text-[10px] font-semibold uppercase tracking-wide text-accent">
               Latest
             </dt>
@@ -537,13 +534,14 @@ export function MeasurementChart({
                 : "—"}
             </dd>
           </div>
-        </dl>
+          </dl>
+        </div>
       ) : null}
 
-      <div className="rounded-md bg-surface p-1 ring-1 ring-accent-bright/25">
+      <div className="bg-surface/50 px-1 py-2 sm:px-2 sm:pb-2">
         {chartRows.length === 0 ? (
           <div className="flex min-h-[200px] items-center justify-center px-3 py-8 text-center text-sm text-muted">
-            No numeric readings for this metric in the current filters.
+            {emptyChartMessage}
           </div>
         ) : (
           <div
@@ -560,6 +558,34 @@ export function MeasurementChart({
                   bottom: showBrush ? 44 : 10,
                 }}
               >
+                <defs>
+                  {activeSeries.map((s, i) => (
+                    <linearGradient
+                      key={s.deviceId}
+                      id={`${chartId}-measurement-line-${i}`}
+                      x1="0"
+                      x2="1"
+                      y1="0"
+                      y2="0"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor={seriesStroke(i)}
+                        stopOpacity={0.45}
+                      />
+                      <stop
+                        offset="55%"
+                        stopColor={seriesStroke(i)}
+                        stopOpacity={1}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor="var(--chart-brand-accent)"
+                        stopOpacity={0.8}
+                      />
+                    </linearGradient>
+                  ))}
+                </defs>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke="rgb(var(--color-accent-bright) / 0.12)"
@@ -626,15 +652,21 @@ export function MeasurementChart({
                     type="monotone"
                     dataKey={`d_${s.deviceId}`}
                     name={s.label}
-                    stroke={
-                      activeSeries.length === 1
-                        ? METRIC_STROKE[metric]
-                        : MULTI_LINE_STROKES[i % MULTI_LINE_STROKES.length]
-                    }
+                    stroke={`url(#${chartId}-measurement-line-${i})`}
                     strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     dot={false}
+                    activeDot={{
+                      r: 4,
+                      strokeWidth: 2,
+                      stroke: "rgb(var(--color-surface))",
+                      fill: seriesStroke(i),
+                    }}
                     connectNulls={false}
-                    isAnimationActive={false}
+                    isAnimationActive={!prefersReducedMotion}
+                    animationDuration={lineAnimationDuration}
+                    animationEasing="ease-out"
                   />
                 ))}
                 {showBrush ? (
@@ -655,12 +687,12 @@ export function MeasurementChart({
         )}
       </div>
 
-      <p className="text-[11px] leading-tight text-muted">
-        {chartRows.length} points · {scoped.length} samples
-        {variant === "expanded" && showBrush
-          ? " · brush to zoom"
-          : ""}
-      </p>
+      <div className="border-t border-border-subtle bg-surface-alt/25 px-3 py-1.5">
+        <p className="text-[11px] leading-tight text-muted">
+          {chartRows.length} points · {scoped.length} samples
+          {showBrush ? " · brush to zoom" : ""}
+        </p>
+      </div>
     </div>
   );
 }

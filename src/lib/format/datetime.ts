@@ -1,9 +1,9 @@
 /**
- * Human-facing timestamps for admin UI.
+ * Human-facing timestamps for app UI (dashboard, admin).
  * Stored values stay UTC in the DB; this converts for display only.
- * Uses Dutch formatting and Europe/Amsterdam so SSR (e.g. Vercel) matches local pool ops expectations.
+ * English (en-US) labels with Europe/Amsterdam timezone match dashboard copy and local pool ops time.
  */
-const DISPLAY_LOCALE = "nl-NL";
+const DISPLAY_LOCALE = "en-US";
 const DISPLAY_TIME_ZONE = "Europe/Amsterdam";
 
 const dateTimeFormatter = new Intl.DateTimeFormat(DISPLAY_LOCALE, {
@@ -20,7 +20,7 @@ export function formatDateTimeForDisplay(
   return dateTimeFormatter.format(date);
 }
 
-/** Compact axis labels for charts (Europe/Amsterdam, nl-NL). */
+/** Compact axis labels for charts (en-US, Europe/Amsterdam). */
 export function formatChartAxisTick(
   epochMs: number,
   opts: { spanMs: number },

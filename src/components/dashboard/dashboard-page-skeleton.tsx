@@ -1,8 +1,49 @@
+import type { ReactNode } from "react";
 import {
   AdminPageHeaderSkeleton,
   AdminPageLoadingShell,
   AdminSkeletonBlock,
 } from "@/components/admin/admin-page-skeleton";
+
+/** Matches `DashboardDeviceFilterForm`: bordered bar, label + select, apply + clear placeholders. */
+function DashboardDeviceFilterBarSkeleton() {
+  return (
+    <div className="mt-4 rounded-xl border border-border-subtle bg-surface-alt/25">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 sm:gap-x-4">
+        <div className="flex min-w-0 items-center gap-2">
+          <AdminSkeletonBlock className="h-3 w-14" />
+          <AdminSkeletonBlock className="h-8 min-h-8 w-full max-w-[14rem] min-w-[10rem] rounded-md sm:max-w-[16rem]" />
+        </div>
+        <div className="flex w-full shrink-0 items-center gap-3 sm:ml-auto sm:w-auto">
+          <AdminSkeletonBlock className="h-8 w-[4.5rem] rounded-md" />
+          <AdminSkeletonBlock className="h-3 w-20" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DashboardHomeSection({
+  gradientViaOpacity,
+  children,
+}: {
+  gradientViaOpacity: "35" | "25";
+  children: ReactNode;
+}) {
+  const via =
+    gradientViaOpacity === "35"
+      ? "via-accent-bright/35"
+      : "via-accent-bright/25";
+  return (
+    <section className="relative overflow-hidden rounded-2xl border border-border-subtle bg-surface p-4 shadow-card sm:p-5">
+      <div
+        className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent ${via} to-transparent`}
+        aria-hidden
+      />
+      {children}
+    </section>
+  );
+}
 
 /** Three strips matching `PoolStatusCards` metric tiles (label, value, target). */
 function PoolMetricTilesSkeleton() {
@@ -11,7 +52,7 @@ function PoolMetricTilesSkeleton() {
       {Array.from({ length: 3 }).map((_, i) => (
         <div
           key={i}
-          className="rounded-md border border-border-subtle border-l-2 border-l-accent-bright bg-surface px-2 py-1.5 sm:px-2.5 sm:py-2"
+          className="rounded-md border border-border-subtle bg-surface px-2 py-1.5 sm:px-2.5 sm:py-2"
         >
           <AdminSkeletonBlock className="h-2.5 w-24" />
           <div className="mt-2 flex items-baseline gap-1.5">
@@ -47,7 +88,7 @@ function MeasurementChartCompactSkeleton() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-md border border-border-subtle border-l-2 border-accent-bright bg-surface px-2 py-1.5"
+            className="rounded-md border border-border-subtle bg-surface px-2 py-1.5"
           >
             <AdminSkeletonBlock className="h-2.5 w-8" />
             <AdminSkeletonBlock className="mt-1 h-4 w-14" />
@@ -81,7 +122,7 @@ function MeasurementChartExpandedSkeleton() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-md border border-border-subtle border-l-2 border-accent-bright bg-surface px-2 py-1.5"
+            className="rounded-md border border-border-subtle bg-surface px-2 py-1.5"
           >
             <AdminSkeletonBlock className="h-2.5 w-8" />
             <AdminSkeletonBlock className="mt-1 h-4 w-16" />
@@ -99,26 +140,35 @@ function MeasurementChartExpandedSkeleton() {
 export function DashboardHomeSkeleton() {
   return (
     <AdminPageLoadingShell className="space-y-6">
-      <AdminPageHeaderSkeleton
-        titleWidthClass="w-36"
-        subtitleWidthClass="w-full max-w-xl"
-      />
+      <div>
+        <AdminSkeletonBlock className="h-8 w-36" />
+        <AdminSkeletonBlock className="mt-1 h-4 w-full max-w-3xl" />
+        <DashboardDeviceFilterBarSkeleton />
+      </div>
 
-      <div className="rounded-xl border border-border-subtle bg-surface p-4 sm:p-5">
-        <AdminSkeletonBlock className="h-4 w-28" />
-        <AdminSkeletonBlock className="mt-1.5 h-4 w-full max-w-lg" />
-        <div className="mt-3">
+      <DashboardHomeSection gradientViaOpacity="35">
+        <div className="relative flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <AdminSkeletonBlock className="h-5 w-28" />
+            <AdminSkeletonBlock className="mt-1 h-4 w-full max-w-2xl" />
+          </div>
+        </div>
+        <div className="relative mt-4">
           <PoolMetricTilesSkeleton />
         </div>
-      </div>
+      </DashboardHomeSection>
 
-      <div className="rounded-xl border border-border-subtle bg-surface p-4 sm:p-5">
-        <AdminSkeletonBlock className="h-4 w-32" />
-        <AdminSkeletonBlock className="mt-1.5 h-4 w-full max-w-md" />
-        <div className="mt-3">
+      <DashboardHomeSection gradientViaOpacity="25">
+        <div className="relative flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <AdminSkeletonBlock className="h-5 w-40" />
+            <AdminSkeletonBlock className="mt-1 h-4 w-full max-w-2xl" />
+          </div>
+        </div>
+        <div className="relative mt-3">
           <MeasurementChartCompactSkeleton />
         </div>
-      </div>
+      </DashboardHomeSection>
     </AdminPageLoadingShell>
   );
 }

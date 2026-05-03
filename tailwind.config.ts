@@ -49,11 +49,16 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "dashboard-card-in": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "landing-bar-up": "landing-bar-up 0.55s ease-out both",
         "landing-marquee": "landing-marquee 40s linear infinite",
         "landing-quiz-step": "landing-quiz-step 0.35s ease-out both",
+        "dashboard-card-in": "dashboard-card-in 0.35s ease-out both",
       },
     },
   },

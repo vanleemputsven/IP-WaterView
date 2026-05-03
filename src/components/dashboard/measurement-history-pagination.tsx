@@ -37,7 +37,7 @@ export function MeasurementHistoryPagination({
       <p className="text-xs text-muted">
         {totalCount === 0
           ? "No results"
-          : `Showing ${from.toLocaleString("nl-NL")}–${to.toLocaleString("nl-NL")} of ${totalCount.toLocaleString("nl-NL")}`}
+          : `Showing ${from.toLocaleString("en-US")}–${to.toLocaleString("en-US")} of ${totalCount.toLocaleString("en-US")}`}
       </p>
       <nav className="flex flex-wrap items-center gap-2" aria-label="Table pages">
         {page <= 1 ? (
