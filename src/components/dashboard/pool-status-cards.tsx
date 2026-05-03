@@ -2,11 +2,12 @@
 
 import type { ReactNode } from "react";
 import {
-  AlertTriangle,
-  CheckCircle2,
+  Angry,
   Droplets,
   FlaskConical,
-  HelpCircle,
+  Frown,
+  Meh,
+  Smile,
   Thermometer,
 } from "lucide-react";
 import type { ClientMeasurement } from "@/lib/mappers/measurement-client";
@@ -30,16 +31,17 @@ function boundsForDevice(
   return map?.[deviceId] ?? poolThresholdBoundsFromRows([]);
 }
 
-/** Card ring tint reflects limit status (accent when OK, danger when out of band). */
-function statusAccentRing(status: RangeStatus): string {
+/** Matches dashboard stat pills (`MeasurementChart`): left accent stripe encodes limit status. */
+function statusLeadingBorder(status: RangeStatus): string {
   switch (status) {
     case "in_range":
-      return "ring-accent-bright/35";
+      return "border-l-accent-bright";
     case "below":
+      return "border-l-warning";
     case "above":
-      return "ring-danger/30";
+      return "border-l-danger";
     default:
-      return "ring-border-subtle";
+      return "border-l-border-subtle";
   }
 }
 
@@ -71,29 +73,39 @@ function formatReadingAge(iso: string): string {
   return `${days} d ago`;
 }
 
-function statusBadgeClasses(status: RangeStatus): string {
-  switch (status) {
-    case "in_range":
-      return "border-success/25 bg-success/10 text-success";
-    case "below":
-      return "border-warning/30 bg-warning/12 text-warning";
-    case "above":
-      return "border-danger/25 bg-danger/12 text-danger";
-    default:
-      return "border-border-subtle bg-surface-alt text-muted";
-  }
-}
+const statusFaceSvgClass = "h-8 w-8 shrink-0 text-accent";
+const STATUS_FACE_STROKE = 1.5;
 
-function StatusGlyph({ status }: { status: RangeStatus }) {
-  const cls = "h-2.5 w-2.5 shrink-0";
+/** Crisp SVG “faces” scale cleanly; avoids OS emoji fonts that tend to tiny or inconsistent glyphs. */
+function StatusFaceIcon({ status }: { status: RangeStatus }) {
+  const title = statusPhrase(status);
+  const wrap = "inline-flex shrink-0";
+
   switch (status) {
     case "in_range":
-      return <CheckCircle2 className={`${cls} text-success`} aria-hidden />;
+      return (
+        <span className={wrap} aria-hidden title={title}>
+          <Smile className={statusFaceSvgClass} strokeWidth={STATUS_FACE_STROKE} focusable={false} />
+        </span>
+      );
     case "below":
+      return (
+        <span className={wrap} aria-hidden title={title}>
+          <Frown className={statusFaceSvgClass} strokeWidth={STATUS_FACE_STROKE} focusable={false} />
+        </span>
+      );
     case "above":
-      return <AlertTriangle className={`${cls} text-current`} aria-hidden />;
+      return (
+        <span className={wrap} aria-hidden title={title}>
+          <Angry className={statusFaceSvgClass} strokeWidth={STATUS_FACE_STROKE} focusable={false} />
+        </span>
+      );
     default:
-      return <HelpCircle className={`${cls} text-muted`} aria-hidden />;
+      return (
+        <span className={wrap} aria-hidden title={title}>
+          <Meh className={statusFaceSvgClass} strokeWidth={STATUS_FACE_STROKE} focusable={false} />
+        </span>
+      );
   }
 }
 
@@ -142,7 +154,7 @@ function RangeGauge({
         className="mt-2"
         aria-hidden
       >
-        <div className="flex justify-between text-[9px] font-medium tabular-nums text-muted">
+        <div className="flex justify-between text-[10px] font-medium tabular-nums text-muted">
           <span>{min}</span>
           <span>{max}</span>
         </div>
@@ -157,15 +169,15 @@ function RangeGauge({
   const band = zoneBandPercents(bounds);
   const markerClass =
     metricStatus === "in_range"
-      ? "border-accent-bright bg-surface shadow-[0_1px_3px_rgb(15_23_42/0.1)]"
-      : "border-danger bg-surface shadow-[0_1px_3px_rgb(220_38_38/0.18)] motion-safe:animate-pulse motion-reduce:animate-none";
+      ? "border-2 border-surface bg-accent-bright shadow-[0_1px_4px_rgb(13_148_136/0.45)]"
+      : "border-2 border-surface bg-danger shadow-[0_1px_4px_rgb(220_38_38/0.35)] motion-safe:animate-pulse motion-reduce:animate-none";
 
   return (
     <div
       className="mt-2"
       aria-hidden
     >
-      <div className="flex justify-between text-[9px] font-medium tabular-nums text-muted">
+      <div className="flex justify-between text-[10px] font-medium tabular-nums text-muted">
         <span>{min}</span>
         <span>{max}</span>
       </div>
@@ -209,37 +221,35 @@ function MetricTile({
 
   return (
     <article
-      className={`relative overflow-hidden rounded-lg border border-border-subtle bg-gradient-to-b from-surface to-surface-alt/30 p-3 shadow-[0_1px_2px_rgb(15_23_42/0.05)] ring-1 ${statusAccentRing(metricStatus)}`}
+      className={`rounded-md border border-border-subtle border-l-2 bg-surface px-2 py-1.5 sm:px-2.5 sm:py-2 ${statusLeadingBorder(metricStatus)}`}
       role="status"
       aria-label={ariaLabel}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-bright/35 to-transparent" />
-
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center text-accent [&>svg]:h-4 [&>svg]:w-4">
             {icon}
           </span>
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-accent">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-accent">
               {title}
             </p>
           </div>
         </div>
-        <span
-          className={`inline-flex max-w-[min(100%,11rem)] shrink-0 items-center gap-1 rounded-full border px-1.5 py-px text-[9px] font-semibold leading-tight ${statusBadgeClasses(metricStatus)}`}
-        >
-          <StatusGlyph status={metricStatus} />
-          <span className="truncate">{statusPhrase(metricStatus)}</span>
-        </span>
+        <div className="inline-flex max-w-[min(100%,14rem)] shrink-0 items-center gap-1.5">
+          <StatusFaceIcon status={metricStatus} />
+          <span className="min-w-0 truncate text-[11px] font-medium leading-tight tracking-wide text-muted">
+            {statusPhrase(metricStatus)}
+          </span>
+        </div>
       </div>
 
-      <p className="mt-2 flex flex-wrap items-baseline gap-x-1 gap-y-0 tabular-nums leading-none">
-        <span className="text-xl font-semibold tracking-tight text-fg sm:text-2xl">
+      <p className="mt-1.5 flex flex-wrap items-baseline gap-x-1 gap-y-0 tabular-nums leading-tight">
+        <span className="text-lg font-semibold tracking-tight text-fg sm:text-xl">
           {valuePrimary}
         </span>
         {hasReading ? (
-          <span className="text-xs font-medium text-fg-secondary sm:text-sm">
+          <span className="text-sm font-semibold text-fg-secondary">
             {valueUnit}
           </span>
         ) : null}
@@ -268,10 +278,8 @@ export function PoolStatusCards({
 
   if (!latest) {
     return (
-      <div className="rounded-lg border border-dashed border-border-subtle bg-surface-alt/40 px-4 py-8 text-center">
-        <p className="text-sm text-muted">
-          No measurements yet. Connect a device to get started.
-        </p>
+      <div className="rounded-lg border border-dashed border-accent-bright/25 bg-accent/[0.04] px-3 py-8 text-center text-sm text-muted">
+        <p>No measurements yet. Connect a device to get started.</p>
       </div>
     );
   }
@@ -304,7 +312,7 @@ export function PoolStatusCards({
 
   return (
     <div>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+      <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3 sm:gap-2">
         <MetricTile
           title="Temperature"
           icon={<Thermometer className="h-4 w-4 shrink-0" aria-hidden />}
@@ -337,7 +345,7 @@ export function PoolStatusCards({
         />
       </div>
       {age ? (
-        <p className="mt-2 text-right text-[10px] font-normal tabular-nums tracking-wide text-muted/65">
+        <p className="mt-2 text-right text-xs tabular-nums text-muted">
           <time dateTime={latest.timestamp}>Last updated {age}</time>
         </p>
       ) : null}

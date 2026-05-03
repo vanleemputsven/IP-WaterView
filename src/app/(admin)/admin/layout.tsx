@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AquaSenseBrandLockup } from "@/components/brand/aqua-sense-brand-lockup";
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 import { AdminSectionNav } from "@/components/layout/admin-section-nav";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export default async function AdminLayout({
   children,
@@ -27,7 +28,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-canvas">
+    <div className="flex min-h-screen flex-col bg-canvas">
       <div className="sticky top-0 z-10">
         <header className="border-b border-border-subtle bg-surface/95 backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-start justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
@@ -47,9 +48,10 @@ export default async function AdminLayout({
           </div>
         </div>
       </div>
-      <main className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
         {children}
       </main>
+      <SiteFooter />
     </div>
   );
 }

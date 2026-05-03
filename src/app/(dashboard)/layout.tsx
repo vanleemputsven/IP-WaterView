@@ -5,6 +5,7 @@ import { DashboardNav } from "@/components/layout/dashboard-nav";
 import { canAccessAdmin } from "@/lib/auth/rbac";
 import Link from "next/link";
 import { AquaSenseBrandLockup } from "@/components/brand/aqua-sense-brand-lockup";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export default async function DashboardLayout({
   children,
@@ -26,7 +27,7 @@ export default async function DashboardLayout({
   const isAdmin = canAccessAdmin(profile.role);
 
   return (
-    <div className="min-h-screen bg-canvas">
+    <div className="flex min-h-screen flex-col bg-canvas">
       <header className="sticky top-0 z-10 border-b border-border-subtle bg-surface/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link
@@ -39,9 +40,10 @@ export default async function DashboardLayout({
           <DashboardNav isAdmin={isAdmin} />
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
         {children}
       </main>
+      <SiteFooter />
     </div>
   );
 }

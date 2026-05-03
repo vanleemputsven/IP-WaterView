@@ -11,7 +11,7 @@ function PoolMetricTilesSkeleton() {
       {Array.from({ length: 3 }).map((_, i) => (
         <div
           key={i}
-          className="rounded-md border border-border-subtle border-l-2 border-l-border-subtle bg-surface px-3 py-2.5"
+          className="rounded-md border border-border-subtle border-l-2 border-l-accent-bright bg-surface px-2 py-1.5 sm:px-2.5 sm:py-2"
         >
           <AdminSkeletonBlock className="h-2.5 w-24" />
           <div className="mt-2 flex items-baseline gap-1.5">

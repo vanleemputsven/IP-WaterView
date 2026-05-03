@@ -19,6 +19,17 @@ import {
   LandingFitQuiz,
 } from "@/components/marketing/landing-fit-quiz";
 import { LandingHeroPreview } from "@/components/marketing/landing-hero-preview";
+import {
+  FooterAttributionHolderLink,
+  FooterChromeTopHairline,
+  FooterLegalNav,
+  siteFooterChromeClass,
+} from "@/components/layout/site-footer";
+import { siteFooterAttribution } from "@/lib/site/site-footer";
+
+/** Footer nav matches dashboard-ish focus rings (`DashboardNav`-style polish). */
+const LANDING_FOOTER_NAV_LINK =
+  "rounded-sm text-sm font-medium text-fg-secondary transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-bright/35 focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
 /** Quick-scan highlights — each item links somewhere useful */
 const LANDING_STRIP_ITEMS = [
@@ -471,46 +482,58 @@ export function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-border-subtle bg-surface/80 py-10 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
-            <Link
-              href="/"
-              className="w-fit transition-opacity hover:opacity-90"
-              aria-label="AquaSense home — previously known as Waterview"
-            >
-              <AquaSenseBrandLockup
-                decorative
-                logoClassName={BRAND_LOCKUP_FOOTER_LOGO_CLASS}
-              />
-            </Link>
-            <p className="text-sm text-muted">
-              © {new Date().getFullYear()} AquaSense. Pool monitoring, refined.
-            </p>
+      <footer className={`${siteFooterChromeClass} py-10`}>
+        <FooterChromeTopHairline />
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex max-w-xl flex-col gap-3 sm:flex-row sm:items-start sm:gap-6 lg:items-start">
+              <Link
+                href="/"
+                className="w-fit shrink-0 transition-opacity hover:opacity-90"
+                aria-label="AquaSense home — previously known as Waterview"
+              >
+                <AquaSenseBrandLockup
+                  decorative
+                  logoClassName={BRAND_LOCKUP_FOOTER_LOGO_CLASS}
+                />
+              </Link>
+              <div className="min-w-0 space-y-1 text-sm leading-relaxed">
+                <p className="text-muted">
+                  ©{" "}
+                  <span className="tabular-nums">
+                    {new Date().getFullYear()}
+                  </span>{" "}
+                  <FooterAttributionHolderLink />
+                  <span aria-hidden={true}> · </span>
+                  <span className="text-fg-secondary">
+                    {siteFooterAttribution.appDisplayName}
+                  </span>
+                  . All rights reserved.
+                </p>
+                <p className="text-xs text-muted/90">
+                  Pool monitoring, refined.
+                </p>
+              </div>
+            </div>
+            <nav className="flex flex-wrap gap-x-6 gap-y-2">
+              <a href="#features" className={LANDING_FOOTER_NAV_LINK}>
+                Features
+              </a>
+              <a href="#how-it-works" className={LANDING_FOOTER_NAV_LINK}>
+                How it works
+              </a>
+              <FitCheckLink className={LANDING_FOOTER_NAV_LINK}>
+                Fit check
+              </FitCheckLink>
+              <Link href="/login" className={LANDING_FOOTER_NAV_LINK}>
+                Sign in
+              </Link>
+              <Link href="/signup" className={LANDING_FOOTER_NAV_LINK}>
+                Sign up
+              </Link>
+            </nav>
           </div>
-          <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-fg-secondary">
-            <a
-              href="#features"
-              className="transition-colors hover:text-fg"
-            >
-              Features
-            </a>
-            <a
-              href="#how-it-works"
-              className="transition-colors hover:text-fg"
-            >
-              How it works
-            </a>
-            <FitCheckLink className="transition-colors hover:text-fg">
-              Fit check
-            </FitCheckLink>
-            <Link href="/login" className="transition-colors hover:text-fg">
-              Sign in
-            </Link>
-            <Link href="/signup" className="transition-colors hover:text-fg">
-              Sign up
-            </Link>
-          </nav>
+          <FooterLegalNav className="border-t border-border-subtle/70 pt-8" />
         </div>
       </footer>
     </div>
