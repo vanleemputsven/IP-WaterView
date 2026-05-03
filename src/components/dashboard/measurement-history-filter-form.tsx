@@ -119,7 +119,7 @@ export function MeasurementHistoryFilterForm({
             </button>
             {hasFilters || hasNonDefaultPageSize ? (
               <Link
-                href="/dashboard/history"
+                href="/dashboard/measurements"
                 className="text-xs text-muted underline-offset-2 transition-colors hover:text-fg-secondary hover:underline"
               >
                 Clear filters

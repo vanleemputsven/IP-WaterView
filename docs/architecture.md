@@ -50,7 +50,8 @@ AquaSense/
 │   │   ├── (dashboard)/              # Route group: user dashboard
 │   │   │   ├── layout.tsx
 │   │   │   ├── page.tsx               # Pool status overview
-│   │   │   └── history/
+│   │   │   ├── measurements/
+│   │   │   └── dosing/
 │   │   ├── (admin)/                   # Route group: admin area
 │   │   │   ├── admin/
 │   │   │   │   ├── layout.tsx
@@ -124,7 +125,7 @@ AquaSense/
 | `/` | Public | Landing; redirect to dashboard if authenticated |
 | `/login`, `/signup` | Public | Auth pages |
 | `/auth/callback` | Public | Supabase OAuth callback |
-| `/(dashboard)/*` | User+ | Pool status, history, charts |
+| `/(dashboard)/*` | User+ | Pool status, measurements, dosing (planned), charts |
 | `/(admin)/admin/*` | Admin | Logs, settings, devices |
 | `/api/admin/devices` | Admin | Register device (API key issued once) |
 | `/api/admin/devices/[id]` | Admin | Delete device and cascade measurements |
