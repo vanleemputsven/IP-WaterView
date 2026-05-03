@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Angry,
   Droplets,
@@ -19,8 +19,16 @@ import {
   type RangeStatus,
 } from "@/lib/pool/threshold-bounds";
 
+type PoolMetricId = "temperature" | "ph" | "chlorine";
+
+export type PoolStatusDeviceRow = {
+  deviceId: string;
+  deviceName: string;
+  latestMeasurement: ClientMeasurement | null;
+};
+
 interface PoolStatusCardsProps {
-  measurements: Array<ClientMeasurement>;
+  devices: PoolStatusDeviceRow[];
   thresholdsByDeviceId?: Record<string, PoolThresholdBounds>;
 }
 
@@ -29,20 +37,6 @@ function boundsForDevice(
   map: Record<string, PoolThresholdBounds> | undefined,
 ): PoolThresholdBounds {
   return map?.[deviceId] ?? poolThresholdBoundsFromRows([]);
-}
-
-/** Matches dashboard stat pills (`MeasurementChart`): left accent stripe encodes limit status. */
-function statusLeadingBorder(status: RangeStatus): string {
-  switch (status) {
-    case "in_range":
-      return "border-l-accent-bright";
-    case "below":
-      return "border-l-warning";
-    case "above":
-      return "border-l-danger";
-    default:
-      return "border-l-border-subtle";
-  }
 }
 
 function statusPhrase(status: RangeStatus): string {
@@ -200,6 +194,7 @@ function RangeGauge({
 
 function MetricTile({
   title,
+  metricId,
   icon,
   valuePrimary,
   valueUnit,
@@ -207,8 +202,12 @@ function MetricTile({
   ariaLabel,
   valueNumeric,
   bounds,
+  selected,
+  animationDelayMs,
+  onSelect,
 }: {
   title: string;
+  metricId: PoolMetricId;
   icon: ReactNode;
   valuePrimary: string;
   valueUnit: string | null;
@@ -216,18 +215,31 @@ function MetricTile({
   ariaLabel: string;
   valueNumeric: number | null;
   bounds: MetricBounds;
+  selected: boolean;
+  animationDelayMs: number;
+  onSelect: (metricId: PoolMetricId) => void;
 }) {
   const hasReading = valueUnit !== null;
+  const interactiveClass = selected
+    ? "border-accent-bright/60 bg-gradient-to-br from-accent/[0.09] via-surface to-surface shadow-md ring-1 ring-accent-bright/30"
+    : "border-border-subtle bg-surface hover:border-accent-bright/45 hover:bg-gradient-to-br hover:from-accent/[0.045] hover:via-surface hover:to-surface hover:shadow-sm";
 
   return (
-    <article
-      className={`rounded-md border border-border-subtle border-l-2 bg-surface px-2 py-1.5 sm:px-2.5 sm:py-2 ${statusLeadingBorder(metricStatus)}`}
-      role="status"
-      aria-label={ariaLabel}
+    <button
+      type="button"
+      className={`group relative overflow-hidden rounded-md border px-2 py-1.5 text-left transition-all duration-200 ease-out motion-safe:animate-dashboard-card-in motion-safe:hover:-translate-y-0.5 motion-reduce:animate-none sm:px-2.5 sm:py-2 ${interactiveClass}`}
+      aria-label={`${ariaLabel}. Press to focus this metric.`}
+      aria-pressed={selected}
+      onClick={() => onSelect(metricId)}
+      style={{ animationDelay: `${animationDelayMs}ms` }}
     >
+      <span
+        className="pointer-events-none absolute inset-x-0 top-0 h-px -translate-x-full bg-gradient-to-r from-transparent via-accent-bright/70 to-transparent opacity-0 transition-[opacity,transform] duration-500 group-hover:translate-x-full group-hover:opacity-100 group-focus-visible:translate-x-full group-focus-visible:opacity-100 motion-reduce:hidden"
+        aria-hidden
+      />
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className="flex h-6 w-6 shrink-0 items-center justify-center text-accent [&>svg]:h-4 [&>svg]:w-4">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center text-accent transition-transform duration-200 ease-out group-hover:scale-105 group-focus-visible:scale-105 motion-reduce:transition-none [&>svg]:h-4 [&>svg]:w-4">
             {icon}
           </span>
           <div className="min-w-0">
@@ -260,31 +272,33 @@ function MetricTile({
         bounds={bounds}
         metricStatus={metricStatus}
       />
-    </article>
+      {selected ? (
+        <p className="mt-2 text-[11px] font-medium leading-tight text-accent">
+          Focused - target {bounds.min} to {bounds.max}
+        </p>
+      ) : null}
+    </button>
   );
 }
 
-export function PoolStatusCards({
-  measurements,
-  thresholdsByDeviceId,
-}: PoolStatusCardsProps) {
-  const latest =
-    measurements.length > 0
-      ? [...measurements].sort(
-          (a, b) =>
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-        )[0]
-      : null;
+function ariaDevicePrefix(deviceName: string, show: boolean): string {
+  return show ? `${deviceName}, ` : "";
+}
 
-  if (!latest) {
-    return (
-      <div className="rounded-lg border border-dashed border-accent-bright/25 bg-accent/[0.04] px-3 py-8 text-center text-sm text-muted">
-        <p>No measurements yet. Connect a device to get started.</p>
-      </div>
-    );
-  }
-
-  const bounds = boundsForDevice(latest.deviceId, thresholdsByDeviceId);
+function DevicePoolMetrics({
+  deviceName,
+  showDeviceInAria,
+  latest,
+  bounds,
+}: {
+  deviceName: string;
+  showDeviceInAria: boolean;
+  latest: ClientMeasurement;
+  bounds: PoolThresholdBounds;
+}) {
+  const pre = ariaDevicePrefix(deviceName, showDeviceInAria);
+  const [focusedMetric, setFocusedMetric] =
+    useState<PoolMetricId>("temperature");
 
   const tempStatus = classifyAgainstBounds(
     latest.temperatureCelsius,
@@ -315,40 +329,118 @@ export function PoolStatusCards({
       <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3 sm:gap-2">
         <MetricTile
           title="Temperature"
+          metricId="temperature"
           icon={<Thermometer className="h-4 w-4 shrink-0" aria-hidden />}
           valuePrimary={tempPrimary}
           valueUnit={tempUnit}
           metricStatus={tempStatus}
-          ariaLabel={`Temperature ${tempMain}, ${statusPhrase(tempStatus)}, target ${bounds.temperature.min} to ${bounds.temperature.max} celsius`}
+          ariaLabel={`${pre}Temperature ${tempMain}, ${statusPhrase(tempStatus)}, target ${bounds.temperature.min} to ${bounds.temperature.max} celsius`}
           valueNumeric={latest.temperatureCelsius}
           bounds={bounds.temperature}
+          selected={focusedMetric === "temperature"}
+          animationDelayMs={0}
+          onSelect={setFocusedMetric}
         />
         <MetricTile
           title="pH"
+          metricId="ph"
           icon={<FlaskConical className="h-4 w-4 shrink-0" aria-hidden />}
           valuePrimary={phPrimary}
           valueUnit={phUnit}
           metricStatus={phStatus}
-          ariaLabel={`pH ${phMain}, ${statusPhrase(phStatus)}, target ${bounds.ph.min} to ${bounds.ph.max}`}
+          ariaLabel={`${pre}pH ${phMain}, ${statusPhrase(phStatus)}, target ${bounds.ph.min} to ${bounds.ph.max}`}
           valueNumeric={latest.ph}
           bounds={bounds.ph}
+          selected={focusedMetric === "ph"}
+          animationDelayMs={70}
+          onSelect={setFocusedMetric}
         />
         <MetricTile
           title="Chlorine"
+          metricId="chlorine"
           icon={<Droplets className="h-4 w-4 shrink-0" aria-hidden />}
           valuePrimary={clPrimary}
           valueUnit={clUnit}
           metricStatus={clStatus}
-          ariaLabel={`Chlorine ${clMain} ppm, ${statusPhrase(clStatus)}, target ${bounds.chlorine.min} to ${bounds.chlorine.max}`}
+          ariaLabel={`${pre}Chlorine ${clMain} ppm, ${statusPhrase(clStatus)}, target ${bounds.chlorine.min} to ${bounds.chlorine.max}`}
           valueNumeric={latest.chlorinePpm}
           bounds={bounds.chlorine}
+          selected={focusedMetric === "chlorine"}
+          animationDelayMs={140}
+          onSelect={setFocusedMetric}
         />
       </div>
+      <p className="mt-2 text-xs text-muted">
+        Hover or tap a metric to keep it in focus.
+      </p>
       {age ? (
         <p className="mt-2 text-right text-xs tabular-nums text-muted">
           <time dateTime={latest.timestamp}>Last updated {age}</time>
         </p>
       ) : null}
+    </div>
+  );
+}
+
+export function PoolStatusCards({
+  devices,
+  thresholdsByDeviceId,
+}: PoolStatusCardsProps) {
+  if (devices.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-accent-bright/25 bg-accent/[0.04] px-3 py-8 text-center text-sm text-muted">
+        <p>No active devices. Add a pool monitor to see status here.</p>
+      </div>
+    );
+  }
+
+  const anyReading = devices.some((d) => d.latestMeasurement !== null);
+  if (!anyReading) {
+    return (
+      <div className="rounded-lg border border-dashed border-accent-bright/25 bg-accent/[0.04] px-3 py-8 text-center text-sm text-muted">
+        <p>No measurements yet. Connect a device to get started.</p>
+      </div>
+    );
+  }
+
+  const showDeviceHeadings = devices.length > 1;
+
+  return (
+    <div className="space-y-0">
+      {devices.map((row, index) => {
+        const bounds = boundsForDevice(row.deviceId, thresholdsByDeviceId);
+        const latest = row.latestMeasurement;
+
+        return (
+          <section
+            key={row.deviceId}
+            className={
+              index > 0
+                ? "mt-6 border-t border-border-subtle pt-6"
+                : undefined
+            }
+            aria-label={showDeviceHeadings ? `Pool status for ${row.deviceName}` : "Pool status"}
+          >
+            {showDeviceHeadings ? (
+              <h3 className="mb-3 truncate text-sm font-semibold text-fg-secondary">
+                {row.deviceName}
+              </h3>
+            ) : null}
+            {latest ? (
+              <DevicePoolMetrics
+                deviceName={row.deviceName}
+                showDeviceInAria={showDeviceHeadings}
+                latest={latest}
+                bounds={bounds}
+              />
+            ) : (
+              <div className="rounded-lg border border-dashed border-border-subtle bg-surface-alt/30 px-3 py-6 text-center text-sm text-muted">
+                <p>No readings yet for {row.deviceName}.</p>
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }
