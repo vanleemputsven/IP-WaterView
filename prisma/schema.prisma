@@ -35,6 +35,56 @@ model Profile {
 }
 
 // ---------------------------------------------------------------------------
+// Pool dosing (volume + chemistry products for homeowner dosing estimates)
+// ---------------------------------------------------------------------------
+
+enum ChlorineProductKind {
+  SODIUM_HYPOCHLORITE_14
+  SODIUM_HYPOCHLORITE_125
+  CALCIUM_HYPOCHLORITE_65
+  TRICHLOR_90
+  DICHLOR_56
+  LITHIUM_HYPOCHLORITE_35
+  CUSTOM
+}
+
+enum PhMinusKind {
+  MURIATIC_31
+  DRY_ACID_SODIUM_BISULFATE
+  SULFURIC_38
+  CUSTOM
+}
+
+enum PhPlusKind {
+  SODA_ASH
+  SODIUM_BICARBONATE
+  CUSTOM
+}
+
+/// One row per device: pool volume and chemistry products for dose estimates (scoped to that sensor / pool).
+model DevicePoolDosingSettings {
+  id        String   @id @default(cuid())
+  deviceId  String   @unique
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  volumeLiters Decimal @db.Decimal(14, 2)
+
+  chlorineProductKind               ChlorineProductKind @default(SODIUM_HYPOCHLORITE_125)
+  chlorineActivePercentOverride     Decimal? @db.Decimal(8, 4)
+
+  phMinusKind                           PhMinusKind @default(MURIATIC_31)
+  phMinusConcentrationPercentOverride   Decimal? @db.Decimal(8, 4)
+
+  phPlusKind                       PhPlusKind @default(SODA_ASH)
+  phPlusPurityPercentOverride      Decimal? @db.Decimal(8, 4)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("device_pool_dosing_settings")
+}
+
+// ---------------------------------------------------------------------------
 // IoT Devices
 // ---------------------------------------------------------------------------
 
@@ -52,6 +102,8 @@ model Device {
   measurements Measurement[]
 
   deviceThresholds DeviceThreshold[]
+
+  devicePoolDosingSettings DevicePoolDosingSettings?
 
   @@unique([profileId, name])
   @@map("devices")

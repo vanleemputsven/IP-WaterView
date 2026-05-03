@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Droplets, FlaskConical, LineChart, LogOut, Shield } from "lucide-react";
+import {
+  Droplets,
+  FlaskConical,
+  LineChart,
+  LogOut,
+  Settings,
+  Shield,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface DashboardNavProps {
@@ -52,6 +59,13 @@ export function DashboardNav({ isAdmin }: DashboardNavProps) {
         <Link href="/dashboard/dosing" className={navClass("/dashboard/dosing")}>
           <FlaskConical className="h-4 w-4 shrink-0" />
           Dosing
+        </Link>
+        <Link
+          href="/dashboard/settings"
+          className={navClass("/dashboard/settings")}
+        >
+          <Settings className="h-4 w-4 shrink-0" />
+          Settings
         </Link>
         {isAdmin && (
           <Link href="/admin" className={navClass("/admin")}>

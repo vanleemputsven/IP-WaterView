@@ -1,7 +1,11 @@
 import Link from "next/link";
-import { SlidersHorizontal } from "lucide-react";
+import { FlaskConical, SlidersHorizontal } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
 import { formatDateTimeForDisplay } from "@/lib/format/datetime";
+import {
+  deviceToolbarGroupClass,
+  deviceToolbarLinkClass,
+} from "@/lib/dashboard/device-toolbar-styles";
 import { CreateDeviceForm } from "@/components/admin/create-device-form";
 import { DeleteDeviceButton } from "@/components/admin/delete-device-button";
 import { DeviceActiveToggle } from "@/components/admin/device-active-toggle";
@@ -9,10 +13,6 @@ import { DeviceApiKeyButton } from "@/components/admin/device-api-key-button";
 import { RenameDeviceButton } from "@/components/admin/rename-device-button";
 
 export const dynamic = "force-dynamic";
-
-/** Icon-only from `xl` so the horizontal toolbar stays narrow; label visible when stacked. */
-const limitsToolbarLinkClass =
-  "flex min-h-9 w-full items-center justify-start gap-1.5 whitespace-nowrap px-3 py-2 text-xs font-medium text-accent transition-colors hover:bg-accent/10 focus-visible:relative focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/35 xl:h-9 xl:w-9 xl:min-w-9 xl:max-w-9 xl:justify-center xl:gap-0 xl:p-0";
 
 export default async function AdminDevicesPage() {
   const devices = await prisma.device.findMany({
@@ -89,11 +89,11 @@ export default async function AdminDevicesPage() {
                     <div
                       role="group"
                       aria-label={`Actions for ${d.name}`}
-                      className="flex w-full max-w-[13rem] flex-col divide-y divide-border-subtle overflow-hidden rounded-lg border border-border-subtle bg-surface shadow-sm xl:inline-flex xl:w-auto xl:max-w-none xl:flex-row xl:divide-x xl:divide-y-0"
+                      className={deviceToolbarGroupClass}
                     >
                       <Link
                         href={`/admin/devices/${encodeURIComponent(d.id)}/thresholds`}
-                        className={limitsToolbarLinkClass}
+                        className={deviceToolbarLinkClass}
                         title="Sensor limits"
                         aria-label={`Sensor limits for ${d.name}`}
                       >
@@ -103,6 +103,20 @@ export default async function AdminDevicesPage() {
                         />
                         <span className="xl:hidden" aria-hidden>
                           Limits
+                        </span>
+                      </Link>
+                      <Link
+                        href={`/admin/devices/${encodeURIComponent(d.id)}/pool-settings`}
+                        className={deviceToolbarLinkClass}
+                        title="Pool volume & products"
+                        aria-label={`Pool dosing settings for ${d.name}`}
+                      >
+                        <FlaskConical
+                          className="h-3.5 w-3.5 shrink-0 opacity-90 xl:h-4 xl:w-4"
+                          aria-hidden
+                        />
+                        <span className="xl:hidden" aria-hidden>
+                          Pool
                         </span>
                       </Link>
                       <RenameDeviceButton
