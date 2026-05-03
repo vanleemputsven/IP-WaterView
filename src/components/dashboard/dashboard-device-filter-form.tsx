@@ -8,6 +8,10 @@ type DeviceOption = {
 type DashboardDeviceFilterFormProps = {
   devices: readonly DeviceOption[];
   selectedDeviceId?: string;
+  /** GET form target — defaults to `/dashboard`. */
+  actionPath?: string;
+  /** Accessible legend for the filter fieldset. */
+  legendLabel?: string;
 };
 
 const filterSelectClass =
@@ -19,6 +23,8 @@ const filterSelectClass =
 export function DashboardDeviceFilterForm({
   devices,
   selectedDeviceId,
+  actionPath = "/dashboard",
+  legendLabel = "Filter dashboard by device",
 }: DashboardDeviceFilterFormProps) {
   if (devices.length === 0) {
     return null;
@@ -29,10 +35,10 @@ export function DashboardDeviceFilterForm({
   return (
     <div className="rounded-xl border border-border-subtle bg-surface-alt/25">
       <fieldset className="min-w-0 border-0 p-0">
-        <legend className="sr-only">Filter dashboard by device</legend>
+        <legend className="sr-only">{legendLabel}</legend>
         <form
           method="GET"
-          action="/dashboard"
+          action={actionPath}
           className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 sm:gap-x-4"
         >
           <div className="flex min-w-0 items-center gap-2">
@@ -63,7 +69,7 @@ export function DashboardDeviceFilterForm({
             </button>
             {hasSelection ? (
               <Link
-                href="/dashboard"
+                href={actionPath}
                 className="text-xs text-muted underline-offset-2 transition-colors hover:text-fg-secondary hover:underline"
               >
                 Clear filter

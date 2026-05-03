@@ -56,6 +56,7 @@ export function buildDashboardHref(opts: { deviceId?: string }): string {
   return `/dashboard?${p.toString()}`;
 }
 
+
 /**
  * Resolves validated measurement history query from URL search params.
  * Device ID must appear in the allowlist from the user's active devices.
