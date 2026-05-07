@@ -89,6 +89,10 @@ export default async function DashboardPage({
   const welcomeName = greetingName(profile.email);
 
   const filterDevicesForSelect = allDevices.map(({ id, name }) => ({ id, name }));
+  const filterCaption =
+    filteredDeviceId !== undefined
+      ? (allDevices.find((d) => d.id === filteredDeviceId)?.name ?? null)
+      : null;
 
   return (
     <div className="space-y-6">
@@ -111,6 +115,24 @@ export default async function DashboardPage({
               selectedDeviceId={filteredDeviceId}
             />
           </div>
+        ) : null}
+        {filteredDeviceId !== undefined && filterCaption ? (
+          <p className="mt-3 text-xs text-muted">
+            Showing data for{" "}
+            <span className="font-medium text-fg-secondary">{filterCaption}</span>
+            .{" "}
+            <Link
+              href={buildMeasurementHistoryHref({
+                deviceId: filteredDeviceId,
+                page: 1,
+                pageSize: DEFAULT_MEASUREMENT_HISTORY_PAGE_SIZE,
+              })}
+              className="text-accent underline-offset-2 hover:underline"
+            >
+              View measurement history for this device
+            </Link>
+            .
+          </p>
         ) : null}
       </div>
 
@@ -157,7 +179,7 @@ export default async function DashboardPage({
                 })}
                 className="text-accent underline-offset-2 hover:underline"
               >
-                View all measurements
+                Open full measurement history
               </Link>
               .
             </p>

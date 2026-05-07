@@ -81,6 +81,4 @@ src/
 └── types/            # Shared types
 ```
 
-## Docs
 
-See [docs/architecture.md](docs/architecture.md) for architecture details.

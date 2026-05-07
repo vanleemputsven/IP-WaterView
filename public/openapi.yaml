@@ -1,0 +1,853 @@
+openapi: 3.0.3
+info:
+  title: AquaSense / Waterview API
+  description: |
+    REST API voor zwembadmonitoring: IoT-ingest (`POST /api/measurements`) en
+    admin-operaties onder `/api/admin/*`.
+
+    **Device-authenticatie:** header `X-Device-Token` met plaintext API-key
+    (hash wordt server-side vergeleken). Alternatieven: `X-Api-Key` of
+    `Authorization: Bearer <key>`.
+
+    **Admin-authenticatie:** Supabase-sessiecookies na login in dezelfde origin.
+    Voor “Try it out” van admin-requests: kopieer de volledige `Cookie`-header
+    uit DevTools terwijl je als ADMIN bent ingelogd, en vul die hieronder in
+    onder het scheme **AdminSession** (parameter **cookie**).
+  version: "1.0.0"
+  contact:
+    name: Project Waterview / AquaSense
+
+servers:
+  - url: /
+    description: Zelfde host als de webapp (productie of lokaal)
+
+tags:
+  - name: Health
+  - name: Measurements
+  - name: Admin — Devices
+  - name: Admin — Thresholds
+  - name: Admin — Profiles
+
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Healthcheck database
+      security: []
+      responses:
+        "200":
+          description: Database bereikbaar
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  database:
+                    type: string
+                    example: connected
+        "503":
+          description: Database niet bereikbaar
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthDegraded"
+
+  /api/measurements:
+    post:
+      tags: [Measurements]
+      summary: Ingest meetwaarde (IoT)
+      description: >
+        Vereist minstens één van `temperatureCelsius`, `ph`, `chlorinePpm`.
+        Het device wordt uitsluitend gekoppeld via de API-key header; andere bodyvelden
+        worden genegeerd voor binding (mits het schema slaagt).
+      operationId: postMeasurement
+      security:
+        - DeviceApiKey: []
+        - DeviceApiKeyLegacyHeader: []
+        - DeviceBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MeasurementIngest"
+            examples:
+              phTemp:
+                summary: pH + temperatuur
+                value:
+                  ph: 7.25
+                  temperatureCelsius: 24.5
+      responses:
+        "201":
+          description: Meting opgeslagen
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeasurementCreated"
+        "400":
+          description: Ongeldige JSON of validatie mislukt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorValidationOrBadRequest"
+        "401":
+          description: Ontbrekende of ongeldige device-key / device niet actief
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "500":
+          description: Interne fout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+
+  /api/admin/devices:
+    post:
+      tags: [Admin — Devices]
+      summary: Nieuw device (admin)
+      security:
+        - AdminSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeviceCreateBody"
+      responses:
+        "201":
+          description: Device + plaintext API-key (eenmalig)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceCreated"
+        "400":
+          description: Ongeldige body / duplicate of onbekende threshold-keys
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: Naam bestaat al of inconsistent min/max
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "422":
+          description: Thresholdwaarde buiten bereik
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "500":
+          description: Aanmaak mislukt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+
+  /api/admin/devices/name-available:
+    get:
+      tags: [Admin — Devices]
+      summary: Controleren of devicenaam vrij is (admin)
+      security:
+        - AdminSession: []
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 120
+          description: Te controleren naam (exact voor dit profiel)
+      responses:
+        "200":
+          description: Resultaat beschikbaarheid
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/NameAvailableOk"
+                  - $ref: "#/components/schemas/NameAvailableTaken"
+        "400":
+          description: Ontbrekende of ongeldige naam
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NameAvailableError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/admin/devices/{id}:
+    patch:
+      tags: [Admin — Devices]
+      summary: Device hernoemen of actief zetten (admin)
+      security:
+        - AdminSession: []
+      parameters:
+        - $ref: "#/components/parameters/DeviceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DevicePatchBody"
+      responses:
+        "200":
+          description: Bijgewerkt of geen wijziging (`message` optioneel)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DevicePatchResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestErrorSimple"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Device niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "409":
+          description: Naamconflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "500":
+          description: Update mislukt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+    delete:
+      tags: [Admin — Devices]
+      summary: Device verwijderen (admin)
+      security:
+        - AdminSession: []
+      parameters:
+        - $ref: "#/components/parameters/DeviceId"
+      responses:
+        "204":
+          description: Verwijderd (lege body)
+        "400":
+          $ref: "#/components/responses/BadRequestErrorSimple"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Device niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "500":
+          description: Verwijderen mislukt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+
+  /api/admin/devices/{id}/api-key:
+    post:
+      tags: [Admin — Devices]
+      summary: Device API-key roteren (admin)
+      security:
+        - AdminSession: []
+      parameters:
+        - $ref: "#/components/parameters/DeviceId"
+      responses:
+        "200":
+          description: Nieuwe key (vorige ongeldig)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceApiKeyRotated"
+        "400":
+          $ref: "#/components/responses/BadRequestErrorSimple"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Device niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "500":
+          description: Rotatie mislukt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+
+  /api/admin/devices/{id}/pool-dosing:
+    patch:
+      tags: [Admin — Devices]
+      summary: Pooldosering-instellingen upserten (admin)
+      security:
+        - AdminSession: []
+      parameters:
+        - $ref: "#/components/parameters/DeviceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PoolDosingBody"
+      responses:
+        "200":
+          description: Opgeslagen instellingen
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PoolDosingDto"
+        "400":
+          $ref: "#/components/responses/BadRequestErrorSimple"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Device niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "500":
+          description: Opslaan mislukt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+
+  /api/admin/thresholds/{id}:
+    patch:
+      tags: [Admin — Thresholds]
+      summary: Platform-drempel bijwerken (admin)
+      security:
+        - AdminSession: []
+      parameters:
+        - $ref: "#/components/parameters/ThresholdRowId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThresholdPatchBody"
+      responses:
+        "200":
+          description: Bijgewerkte rij
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThresholdPatchResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestErrorSimple"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Threshold niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "409":
+          description: min ≥ max na wijziging
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "422":
+          description: Waarde buiten bereik voor deze key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+
+  /api/admin/device-thresholds/{id}:
+    patch:
+      tags: [Admin — Thresholds]
+      summary: Per-device drempel bijwerken (admin)
+      description: >
+        Pad-id kan een Prisma cuid zijn of een legacy/backfill-id (12–36 tekens alfanumeriek).
+      security:
+        - AdminSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 12
+            maxLength: 36
+            pattern: '^[a-zA-Z0-9_-]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThresholdPatchBody"
+      responses:
+        "200":
+          description: Bijgewerkte rij
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceThresholdPatchResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestErrorSimple"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Rij niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "409":
+          description: min ≥ max na wijziging
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "422":
+          description: Waarde buiten bereik voor deze key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+
+  /api/admin/profiles/{id}:
+    patch:
+      tags: [Admin — Profiles]
+      summary: Profielrol wijzigen (admin)
+      description: >
+        `id` is **Profile.id** (cuid), niet het Supabase user-id.
+      security:
+        - AdminSession: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileRolePatchBody"
+      responses:
+        "200":
+          description: Rol bijgewerkt (of al gelijk)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileRoleResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestErrorSimple"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Profiel niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+        "409":
+          description: Laatste admin kan niet gedegradeerd worden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorSimple"
+
+components:
+  securitySchemes:
+    DeviceApiKey:
+      type: apiKey
+      in: header
+      name: X-Device-Token
+      description: Plaintext device API-key (`wv_…`).
+    DeviceApiKeyLegacyHeader:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: Alternatief voor oudere clients.
+    DeviceBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: Device API key
+      description: Zelfde waarde als X-Device-Token.
+    AdminSession:
+      type: apiKey
+      in: header
+      name: Cookie
+      description: >
+        Volledige Cookie-header zoals na ADMIN-login (bv. `sb-…-auth-token=…`).
+        In Swagger UI onder Authorize invullen als één regel.
+
+  parameters:
+    DeviceId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Device-id (Prisma cuid)
+    ThresholdRowId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Rij-id platform Threshold (cuid)
+
+  responses:
+    Unauthorized:
+      description: Geen geldige sessie
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorSimple"
+    Forbidden:
+      description: Geen adminrol
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorSimple"
+    BadRequestErrorSimple:
+      description: Ongeldige invoer
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorSimple"
+
+  schemas:
+    ErrorSimple:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    ErrorValidationOrBadRequest:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Validation failed
+        details:
+          type: object
+          additionalProperties: true
+          description: Zod flatten structuur
+
+    HealthDegraded:
+      type: object
+      properties:
+        status:
+          type: string
+          example: degraded
+        database:
+          type: string
+          example: disconnected
+
+    MeasurementIngest:
+      type: object
+      description: Minstens één van temperatureCelsius, ph of chlorinePpm moet aanwezig zijn.
+      properties:
+        temperatureCelsius:
+          type: number
+          minimum: -10
+          maximum: 50
+        ph:
+          type: number
+          minimum: 0
+          maximum: 14
+        chlorinePpm:
+          type: number
+          minimum: 0
+          maximum: 20
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601; optioneel — default servertijd
+
+    MeasurementCreated:
+      type: object
+      required: [id, timestamp]
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    DeviceCreateBody:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          maxLength: 120
+        seedMeasurements:
+          type: boolean
+        initialThresholds:
+          type: array
+          maxItems: 32
+          items:
+            type: object
+            required: [key, value]
+            properties:
+              key:
+                type: string
+                minLength: 1
+                maxLength: 64
+              value:
+                type: number
+
+    DeviceCreated:
+      type: object
+      required: [id, name, apiKey, message]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        apiKey:
+          type: string
+          description: Plaintext — alleen bij create zichtbaar
+        message:
+          type: string
+
+    NameAvailableOk:
+      type: object
+      required: [available]
+      properties:
+        available:
+          type: boolean
+          enum: [true]
+
+    NameAvailableTaken:
+      type: object
+      required: [available, error]
+      properties:
+        available:
+          type: boolean
+          enum: [false]
+        error:
+          type: string
+
+    NameAvailableError:
+      type: object
+      required: [available, error]
+      properties:
+        available:
+          type: boolean
+          enum: [false]
+        error:
+          type: string
+
+    DevicePatchBody:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        isActive:
+          type: boolean
+      description: Minstens één veld verplicht
+
+    DevicePatchResponse:
+      type: object
+      required: [id, name, isActive]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        isActive:
+          type: boolean
+        message:
+          type: string
+          example: No changes
+
+    DeviceApiKeyRotated:
+      type: object
+      required: [id, name, apiKey, message]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        apiKey:
+          type: string
+        message:
+          type: string
+
+    ChlorineProductKind:
+      type: string
+      enum:
+        - SODIUM_HYPOCHLORITE_14
+        - SODIUM_HYPOCHLORITE_125
+        - CALCIUM_HYPOCHLORITE_65
+        - TRICHLOR_90
+        - DICHLOR_56
+        - LITHIUM_HYPOCHLORITE_35
+        - CUSTOM
+
+    PhMinusKind:
+      type: string
+      enum:
+        - MURIATIC_31
+        - DRY_ACID_SODIUM_BISULFATE
+        - SULFURIC_38
+        - CUSTOM
+
+    PhPlusKind:
+      type: string
+      enum:
+        - SODA_ASH
+        - SODIUM_BICARBONATE
+        - CUSTOM
+
+    PoolDosingBody:
+      type: object
+      required:
+        - volumeLiters
+        - chlorineProductKind
+        - phMinusKind
+        - phPlusKind
+      properties:
+        volumeLiters:
+          type: number
+          exclusiveMinimum: 0
+          maximum: 10000000
+        chlorineProductKind:
+          $ref: "#/components/schemas/ChlorineProductKind"
+        chlorineActivePercentOverride:
+          type: number
+          nullable: true
+          exclusiveMinimum: 0
+          maximum: 100
+        phMinusKind:
+          $ref: "#/components/schemas/PhMinusKind"
+        phMinusConcentrationPercentOverride:
+          type: number
+          nullable: true
+          exclusiveMinimum: 0
+          maximum: 100
+        phPlusKind:
+          $ref: "#/components/schemas/PhPlusKind"
+        phPlusPurityPercentOverride:
+          type: number
+          nullable: true
+          exclusiveMinimum: 0
+          maximum: 100
+
+    PoolDosingDto:
+      type: object
+      required:
+        - volumeLiters
+        - chlorineProductKind
+        - chlorineActivePercentOverride
+        - phMinusKind
+        - phMinusConcentrationPercentOverride
+        - phPlusKind
+        - phPlusPurityPercentOverride
+      properties:
+        volumeLiters:
+          type: number
+        chlorineProductKind:
+          $ref: "#/components/schemas/ChlorineProductKind"
+        chlorineActivePercentOverride:
+          type: number
+          nullable: true
+        phMinusKind:
+          $ref: "#/components/schemas/PhMinusKind"
+        phMinusConcentrationPercentOverride:
+          type: number
+          nullable: true
+        phPlusKind:
+          $ref: "#/components/schemas/PhPlusKind"
+        phPlusPurityPercentOverride:
+          type: number
+          nullable: true
+
+    ThresholdPatchBody:
+      type: object
+      additionalProperties: false
+      required: [value]
+      properties:
+        value:
+          oneOf:
+            - type: number
+            - type: string
+          description: Getal of parseerbare string (komma als decimaal ok)
+
+    ThresholdPatchResponse:
+      type: object
+      required: [id, key, value]
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        value:
+          type: number
+
+    DeviceThresholdPatchResponse:
+      type: object
+      required: [id, key, value, deviceId]
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        value:
+          type: number
+        deviceId:
+          type: string
+
+    ProfileRolePatchBody:
+      type: object
+      additionalProperties: false
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [USER, ADMIN]
+
+    ProfileRoleResponse:
+      type: object
+      required: [id, role]
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+          enum: [USER, ADMIN]
